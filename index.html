@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ForwardBot</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f0f0f;--surface:#1c1c1e;--surface2:#2c2c2e;--surface3:#3a3a3c;
+  --border:#38383a;--accent:#4d7fff;--success:#34c759;--danger:#ff3b30;
+  --warn:#ff9500;--text:#fff;--text2:rgba(235,235,245,.8);--muted:#8e8e93;
+  --header:#1c1c1e;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Text',sans-serif;max-width:480px;margin:0 auto;min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+/* HEADER */
+.hdr{background:var(--header);padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20;min-height:52px}
+.hdr-back{background:none;border:none;color:var(--accent);font-size:22px;cursor:pointer;width:32px;flex-shrink:0;display:flex;align-items:center}
+.hdr-title{font-size:17px;font-weight:600;flex:1}
+.hdr-sub{font-size:13px;color:var(--muted);flex:1}
+.hdr-btn{background:none;border:none;color:var(--accent);font-size:14px;cursor:pointer;flex-shrink:0}
+.hdr-icon{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4d7fff,#00c6ff);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.hdr-menu{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding-bottom:20px}
+/* BUTTONS */
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s}
+.btn:active{transform:scale(.98);opacity:.85}
+.btn-p{background:var(--accent);color:#fff}
+.btn-p:disabled{background:#3a3a3a;color:var(--muted);cursor:default;transform:none}
+.btn-s{background:transparent;color:var(--accent);border:none}
+.btn-o{background:transparent;color:var(--muted);border:1px solid var(--border)}
+/* INPUTS */
+.inp{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--muted)}
+.inp-code{text-align:center;font-size:24px;font-weight:700;letter-spacing:14px}
+.sel{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:0 16px 12px}
+.card-row{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer}
+.card-row:last-child{border-bottom:none}
+.card-row:active{background:var(--surface2)}
+.card-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+/* SEARCH */
+.search-wrap{padding:10px 16px;background:var(--header);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:10}
+.search-inp{width:100%;background:var(--surface2);border:none;border-radius:10px;padding:9px 14px 9px 36px;color:var(--text);font-size:15px;font-family:inherit;outline:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:11px center}
+.search-inp::placeholder{color:var(--muted)}
+/* CHAT ITEMS */
+.chat-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.chat-item:active{background:var(--surface)}
+.chat-av{width:42px;height:42px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.chat-av.ch{background:rgba(77,127,255,.2)}
+.chat-av.gr{background:rgba(52,199,89,.2)}
+.chat-info{flex:1;min-width:0}
+.chat-info strong{font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-info span{font-size:12px;color:var(--muted)}
+.chev{color:var(--muted);font-size:16px;flex-shrink:0}
+/* SECTION COLLAPSE */
+.sec-header{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border)}
+.sec-header:active{background:var(--surface2)}
+.sec-arrow{font-size:12px;color:var(--muted);transition:transform .2s}
+.sec-arrow.open{transform:rotate(180deg)}
+.sec-title{font-size:14px;font-weight:600;flex:1}
+.sec-body{display:none}
+.sec-body.open{display:block}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer}
+.setting-row:last-child{border-bottom:none}
+.setting-row:active{background:var(--surface2)}
+.setting-key{font-size:14px;color:var(--text2)}
+.setting-val{font-size:14px;color:var(--muted);text-align:right;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.setting-val.green{color:var(--success)}
+/* TOGGLE */
+.toggle{width:44px;height:26px;background:var(--surface3);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--success)}
+.toggle::after{content:'';position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.toggle.on::after{transform:translateX(18px)}
+/* FILTER TOOLBAR */
+.filter-toolbar{position:sticky;bottom:0;background:var(--header);border-top:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:8px;z-index:10}
+.filter-type-sel{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;-webkit-appearance:none;display:flex;align-items:center;gap:6px;cursor:pointer}
+.ftb-btn{width:42px;height:42px;border-radius:10px;background:var(--accent);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ftb-btn.del{background:var(--surface2);border:1px solid var(--border);color:var(--danger)}
+/* FILTER ROW */
+.filter-row{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border)}
+.f-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.f-check.on{background:var(--accent);border-color:var(--accent)}
+.f-type-icon{font-size:20px;flex-shrink:0}
+.f-val-inp{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:14px;font-family:inherit;outline:none}
+.f-val-inp:focus{border-color:var(--accent)}
+.f-ok{width:34px;height:34px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.f-del{width:34px;height:34px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--danger);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* TOAST */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:10px 20px;font-size:14px;font-weight:500;z-index:999;transition:transform .3s;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:rgba(52,199,89,.5)}
+.toast.err{border-color:rgba(255,59,48,.5)}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:var(--surface3);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+/* DROPDOWN */
+.dropdown{background:var(--surface2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:6px}
+.dd-item{padding:13px 16px;border-bottom:1px solid var(--border);font-size:15px;cursor:pointer;display:flex;align-items:center;gap:10px}
+.dd-item:last-child{border-bottom:none}
+.dd-item:active{background:var(--surface3)}
+.dd-item.selected{color:var(--accent)}
+.dd-check{width:20px;text-align:center;flex-shrink:0}
+/* FAB */
+.fab{position:fixed;bottom:24px;right:20px;width:56px;height:56px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 4px 20px rgba(77,127,255,.5);display:flex;align-items:center;justify-content:center;transition:transform .15s;z-index:30}
+.fab:active{transform:scale(.92)}
+/* MISC */
+.pb80{padding-bottom:80px}
+.tag{background:var(--surface2);border:1px solid var(--border);padding:3px 9px;border-radius:6px;font-size:13px;color:var(--accent);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
+.dot-g{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 5px var(--success);flex-shrink:0}
+.dot-r{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.rule-card{margin:0 16px 10px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
+.rule-card.off{opacity:.5}
+.badge{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.icon-btn{width:32px;height:32px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer}
+.icon-btn:active{opacity:.7}
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+.empty .ei{font-size:48px;margin-bottom:12px}
+/* CONNECTED BANNER */
+.conn-banner{margin:12px 16px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.3);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.conn-info strong{font-size:14px;display:block}
+.conn-info span{font-size:12px;color:var(--muted)}
+.disc-btn{margin-left:auto;background:none;border:none;color:var(--danger);font-size:13px;cursor:pointer}
+/* ERROR BOX */
+.err-box{margin:12px 16px;background:rgba(255,59,48,.1);border:1px solid rgba(255,59,48,.3);border-radius:12px;padding:14px}
+.err-title{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.err-body{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px}
+/* INFO LINKS */
+.info-links{margin-top:14px}
+.ilink{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.ilink:last-child{border-bottom:none}
+.ilink-ic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ilink-text strong{font-size:14px;display:block}
+.ilink-text span{font-size:12px;color:var(--muted)}
+/* STEPS */
+.steps{display:flex;gap:6px;margin-bottom:20px}
+.step{flex:1;height:3px;border-radius:2px;background:var(--border)}
+.step.done{background:var(--accent)}
+.step.act{background:var(--accent);animation:glow 1.5s infinite}
+@keyframes glow{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ -->
+<!-- HOME -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen active" id="s-home">
+  <div class="hdr">
+    <div class="hdr-title">Junction Bot</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="hdr-icon" id="home-av">?</div>
+      <button class="hdr-menu" onclick="openMenu()">☰</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="home-conn"></div>
+    <div style="padding:40px 20px 24px;text-align:center">
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:6px">Nima qilmoqchisiz?</h2>
+      <p style="font-size:14px;color:var(--muted)">Asosiy funksiyalardan birini tanlang</p>
+    </div>
+    <div style="padding:0 16px">
+      <div class="card" style="margin:0 0 10px">
+        <div class="card-row" onclick="startFw()">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(77,127,255,.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">✈️</div>
+          <div style="flex:1"><strong style="font-size:15px;display:block">Xabarlarni forward qilish</strong><span style="font-size:13px;color:var(--muted)">kelgan xabarlarni avtomatik uzatish</span></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="card-row" onclick="go('s-rules')">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(52,199,89,.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📋</div>
+          <div style="flex:1"><strong style="font-size:15px;display:block">Qoidalarni boshqarish</strong><span style="font-size:13px;color:var(--muted)">faol forward qoidalari ro'yxati</span></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="card-row" onclick="toast('Tez orada!','ok')">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,149,0,.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📄</div>
+          <div style="flex:1"><strong style="font-size:15px;display:block">Chat tarixini ko'chirish</strong><span style="font-size:13px;color:var(--muted)">barcha o'tgan xabarlarni nusxalash</span></div>
+          <span class="chev">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- CONNECT -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="s-connect">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-home')">‹</button>
+    <div class="hdr-title" id="conn-title">Akkauntni ulash</div>
+  </div>
+  <div class="content" style="padding:16px">
+    <div id="conn-desc" style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:16px"></div>
+    <div class="steps" id="conn-steps">
+      <div class="step act" id="cst1"></div>
+      <div class="step" id="cst2"></div>
+      <div class="step" id="cst3"></div>
+    </div>
+
+    <!-- Phone -->
+    <div id="st-phone">
+      <div class="card-label">Telefon raqam</div>
+      <input class="inp" id="inp-phone" type="tel" placeholder="+998901234567" style="margin-bottom:12px">
+      <button class="btn btn-p" id="btn-code" onclick="sendCode()">Kod olish</button>
+      <div class="info-links">
+        <div class="ilink"><div class="ilink-ic" style="background:rgba(77,127,255,.15)">✈️</div><div class="ilink-text"><strong>Telegram Community</strong><span>8000 dan ortiq a'zo</span></div><span class="chev">›</span></div>
+        <div class="ilink"><div class="ilink-ic" style="background:rgba(77,127,255,.15)">🔒</div><div class="ilink-text"><strong>Nima uchun ulash kerak?</strong><span>Qanday ishlaydi</span></div><span class="chev">›</span></div>
+        <div class="ilink"><div class="ilink-ic" style="background:rgba(255,165,0,.2)">⚡</div><div class="ilink-text"><strong>Junctionbot.io</strong><span>Xavfsizlik kafolati</span></div><span class="chev">›</span></div>
+        <div class="ilink"><div class="ilink-ic" style="background:rgba(52,199,89,.15)">👥</div><div class="ilink-text"><strong>Biz haqimizda</strong><span>2017 yildan faoliyat yuritamiz</span></div><span class="chev">›</span></div>
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div id="st-code" style="display:none">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:14px;line-height:1.5">Telegramga 5 xonali kod yuborildi:</p>
+      <input class="inp inp-code" id="inp-code" type="tel" maxlength="5" placeholder="—————" style="margin-bottom:12px">
+      <button class="btn btn-p" onclick="verifyCode()" style="margin-bottom:8px">Tasdiqlash</button>
+      <button class="btn btn-s" onclick="sendCode()">Kodni qayta yuborish</button>
+    </div>
+
+    <!-- Password -->
+    <div id="st-pass" style="display:none">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:14px;line-height:1.5">Ikki bosqichli autentifikatsiya yoqilgan. Bulut parolini kiriting:</p>
+      <div style="position:relative;margin-bottom:12px">
+        <input class="inp" id="inp-pass" type="password" placeholder="Parol">
+        <button onclick="togglePass()" style="position:absolute;right:12px;top:14px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer" id="eye-btn">👁</button>
+      </div>
+      <button class="btn btn-p" onclick="verifyPass()">Tasdiqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SELECT SOURCE -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="s-src">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-home')">‹</button>
+    <div class="hdr-sub">Manbani tanlang</div>
+  </div>
+  <div class="search-wrap"><input class="search-inp" id="src-q" placeholder="Qidirish..." oninput="filterList('src')"></div>
+  <div class="content pb80" id="src-list"></div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SELECT DEST -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="s-dst">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-src')">‹</button>
+    <div class="hdr-sub">Manzilni tanlang</div>
+  </div>
+  <div class="search-wrap"><input class="search-inp" id="dst-q" placeholder="Qidirish..." oninput="filterList('dst')"></div>
+  <div class="content pb80" id="dst-list"></div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- BASIC SETTINGS -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="s-basic">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-dst')">‹</button>
+    <div class="hdr-sub" style="text-align:center">Asosiy sozlamalar</div>
+    <button class="hdr-btn" onclick="go('s-dst')">›</button>
+  </div>
+  <div class="content">
+    <div id="basic-route" style="padding:14px 16px 0"></div>
+    <div style="padding:12px 16px">
+      <div class="card-label">Forward turi</div>
+      <select class="sel" id="sel-fwtype" style="margin-bottom:14px">
+        <option value="new">Yangi xabarlar</option>
+        <option value="history">Tarix ham</option>
+      </select>
+      <div class="card-label" style="display:flex;align-items:center;gap:6px">Yetkazish rejimi <span style="color:var(--accent);cursor:pointer" onclick="showDeliveryInfo()">ⓘ</span></div>
+      <div style="position:relative;margin-bottom:14px">
+        <div id="del-display" class="sel" style="cursor:pointer" onclick="toggleDelDrop()">Copy via bot</div>
+        <div id="del-drop" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:50;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:4px;box-shadow:0 8px 24px rgba(0,0,0,.5)">
+          <div class="dd-item selected" data-v="copy_bot" onclick="selDel(this)"><span class="dd-check">✓</span>Copy via bot</div>
+          <div class="dd-item" data-v="copy_acc" onclick="selDel(this)"><span class="dd-check"></span>Copy via account</div>
+          <div class="dd-item" data-v="fwd_acc" onclick="selDel(this)"><span class="dd-check"></span>Forward via account</div>
+          <div class="dd-item" data-v="fwd_copy" onclick="selDel(this)"><span class="dd-check"></span>Forward (copy if restricted) via account</div>
+          <div class="dd-item" data-v="copy_fwd" onclick="selDel(this)"><span class="dd-check"></span>Copy common and forward forwarded via account</div>
+          <div class="dd-item" data-v="copy_flood" onclick="selDel(this)"><span class="dd-check"></span>Copy via account, on flood via bot</div>
+        </div>
+      </div>
+      <div class="card-label">Manba havolalarini almashtirish</div>
+      <select class="sel" id="sel-links" style="margin-bottom:14px">
+        <option value="leave">O'zgarishsiz qoldirish</option>
+        <option value="remove">O'chirish</option>
+        <option value="replace">Almashtirish</option>
+      </select>
+      <div id="admin-err"></div>
+      <button class="btn btn-p" onclick="createRule()">Yaratish</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- RULE SETTINGS (kengaytirilgan) -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="s-rsettings">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-rules')">‹</button>
+    <div class="hdr-sub" style="text-align:center">Qoida sozlamalari</div>
+    <button class="hdr-btn" onclick="toast('Yordam','ok')">?</button>
+  </div>
+  <div class="content pb80">
+    <div id="rs-route" style="padding:12px 16px;font-size:14px;color:var(--text2);border-bottom:1px solid var(--border)"></div>
+    <div class="search-wrap" style="top:52px"><input class="search-inp" id="rs-q" placeholder="Qidirish..." oninput="filterSettings()"></div>
+
+    <!-- Favourites -->
+    <div id="sec-fav" class="card" style="margin-top:12px">
+      <div class="sec-header" onclick="toggleSec('fav')">
+        <span class="sec-arrow" id="arr-fav">▼</span>
+        <span class="sec-title">Favourites</span>
+      </div>
+      <div class="sec-body open" id="body-fav">
+        <div class="setting-row" onclick="editSetting('delivery_mode','Delivery mode')">
+          <span class="setting-key">Delivery mode</span>
+          <span class="setting-val" id="sv-delivery_mode">forward_client</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('stories','Stories')">
+          <span class="setting-key">Stories</span>
+          <span class="setting-val" id="sv-stories">message</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- General -->
+    <div id="sec-gen" class="card">
+      <div class="sec-header" onclick="toggleSec('gen')">
+        <span class="sec-arrow" id="arr-gen">▼</span>
+        <span class="sec-title">General</span>
+      </div>
+      <div class="sec-body open" id="body-gen">
+        <div class="setting-row">
+          <span class="setting-key">Copy new posts</span>
+          <span class="setting-val green">🟢 Instant</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('receipt_delays','Receipt delays')">
+          <span class="setting-key">Receipt delays</span>
+          <span class="setting-val" id="sv-receipt_delays">0</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('sync_edits','Sync edits')">
+          <span class="setting-key">Sync edits</span>
+          <span class="setting-val" id="sv-sync_edits">edit</span>
+        </div>
+        <div class="setting-row" onclick="toggleBool('processing_report','Processing report')">
+          <span class="setting-key">Processing report</span>
+          <div class="toggle" id="tgl-processing_report"></div>
+        </div>
+        <div class="setting-row" onclick="toggleBool('sync_del','Sync deletions')">
+          <span class="setting-key">Sync deletions</span>
+          <div class="toggle" id="tgl-sync_del"></div>
+        </div>
+        <div class="setting-row" onclick="editSetting('delayed_del','Delayed deletion')">
+          <span class="setting-key">Delayed deletion</span>
+          <span class="setting-val" id="sv-delayed_del">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtering -->
+    <div id="sec-fil" class="card">
+      <div class="sec-header" onclick="toggleSec('fil')">
+        <span class="sec-arrow" id="arr-fil">▼</span>
+        <span class="sec-title">Filtering</span>
+      </div>
+      <div class="sec-body open" id="body-fil">
+        <div class="setting-row" onclick="go('s-filters')">
+          <span class="setting-key">Filters</span>
+          <span class="setting-val" id="sv-filters">0</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('duplicates','Duplicates')">
+          <span class="setting-key">Duplicates</span>
+          <span class="setting-val" id="sv-duplicates">pass</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('my_messages','My messages')">
+          <span class="setting-key">My messages</span>
+          <span class="setting-val" id="sv-my_messages">filter</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('filter_interval','Filter-interval')">
+          <span class="setting-key">Filter-interval</span>
+          <span class="setting-val" id="sv-filter_interval">0</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('filter_order','Filtering order')">
+          <span class="setting-key">Filtering order</span>
+          <span class="setting-val" id="sv-filter_order">after_replacements</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('filter_fwd','Filter forwards')">
+          <span class="setting-key">Filter forwards</span>
+          <span class="setting-val" id="sv-filter_fwd">all</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('delay_filter','Delay and delayed filter')">
+          <span class="setting-key">Delay and delayed filter</span>
+          <span class="setting-val" id="sv-delay_filter">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Source data -->
+    <div id="sec-src" class="card">
+      <div class="sec-header" onclick="toggleSec('src')">
+        <span class="sec-arrow" id="arr-src">▼</span>
+        <span class="sec-title">Source data</span>
+      </div>
+      <div class="sec-body open" id="body-src">
+        <div class="setting-row" onclick="editSetting('orig_link','Original message link')">
+          <span class="setting-key">Original message link</span>
+          <span class="setting-val" id="sv-orig_link">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('source_name','Source name')">
+          <span class="setting-key">Source name</span>
+          <span class="setting-val" id="sv-source_name">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('author','Author')">
+          <span class="setting-key">Author</span>
+          <span class="setting-val" id="sv-author">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('click_btn','Click the button')">
+          <span class="setting-key">Click the button</span>
+          <span class="setting-val" id="sv-click_btn">none</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modification -->
+    <div id="sec-mod" class="card">
+      <div class="sec-header" onclick="toggleSec('mod')">
+        <span class="sec-arrow" id="arr-mod">▼</span>
+        <span class="sec-title">Modification</span>
+      </div>
+      <div class="sec-body open" id="body-mod">
+        <div class="setting-row" onclick="editSetting('replacements','Replacements')">
+          <span class="setting-key">Replacements</span>
+          <span class="setting-val" id="sv-replacements">0</span>
+        </div>
+        <div class="setting-row" onclick="toast('GPT integratsiya tez orada!','ok')">
+          <span class="setting-key">AI Processing (ChatGPT and others)</span>
+          <span class="chev">›</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('trim','Trim')">
+          <span class="setting-key">Trim</span>
+          <span class="setting-val" id="sv-trim">0</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('header','Header')">
+          <span class="setting-key">Header</span>
+          <span class="setting-val" id="sv-header">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('footer','Footer')">
+          <span class="setting-key">Footer</span>
+          <span class="setting-val" id="sv-footer">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('replace_links','Replace source links')">
+          <span class="setting-key">Replace source links</span>
+          <span class="setting-val" id="sv-replace_links">ignore</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div id="sec-cnt" class="card">
+      <div class="sec-header" onclick="toggleSec('cnt')">
+        <span class="sec-arrow" id="arr-cnt">▼</span>
+        <span class="sec-title">Content</span>
+      </div>
+      <div class="sec-body open" id="body-cnt">
+        <div class="setting-row" onclick="editSetting('watermarks','Watermarks')">
+          <span class="setting-key">Watermarks</span>
+          <span class="setting-val" id="sv-watermarks">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('media_caption','Media caption')">
+          <span class="setting-key">Media caption</span>
+          <span class="setting-val" id="sv-media_caption">caption_name</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('feedback_btns','Feedback buttons')">
+          <span class="setting-key">Feedback buttons</span>
+          <span class="setting-val" id="sv-feedback_btns">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('copy_btns','Copy buttons')">
+          <span class="setting-key">Copy buttons</span>
+          <span class="setting-val" id="sv-copy_btns">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('add_btns','Add buttons')">
+          <span class="setting-key">Add buttons</span>
+          <span class="setting-val" id="sv-add_btns">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('polls','Polls')">
+          <span class="setting-key">Polls</span>
+          <span class="setting-val" id="sv-polls">none</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('comments','Comments')">
+          <span class="setting-key">Comments</span>
+          <span class="setting-val" id="sv-comments">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Publishing -->
+    <div id="sec-pub" class="card">
+      <div class="sec-header" onclick="toggleSec('pub')">
+        <span class="sec-arrow" id="arr-pub">▼</span>
+        <span class="sec-title">Publishing</span>
+      </div>
+      <div class="sec-body open" id="body-pub">
+        <div class="setting-row" onclick="toggleBool('google_drive','Google Drive')">
+          <span class="setting-key">Google Drive</span>
+          <div class="toggle" id="tgl-google_drive"></div>
+        </div>
+        <div class="setting-row" onclick="editSetting('pub_delay','Delay and delayed filter')">
+          <span class="setting-key">Delay and delayed filter</span>
+          <span class="setting-val" id="sv-pub_delay">0</span>
+        </div>
+        <div class="setting-row" onclick="toggleBool('pin','Pin')">
+          <span class="setting-key">Pin</span>
+          <div class="toggle" id="tgl-pin"></div>
+        </div>
+        <div class="setting-row" onclick="toggleBool('silent','Silent mode')">
+          <span class="setting-key">Silent mode</span>
+          <div class="toggle" id="tgl-silent"></div>
+        </div>
+        <div class="setting-row" onclick="editSetting('preview','Preview')">
+          <span class="setting-key">Preview</span>
+          <span class="setting-val" id="sv-preview">pass</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('delivery_rate','Delivery rate')">
+          <span class="setting-key">Delivery rate</span>
+          <span class="setting-val" id="sv-delivery_rate">0</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('schedule','Schedule')">
+          <span class="setting-key">Schedule</span>
+          <span class="setting-val" id="sv-schedule">0</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('flood_behavior','Flood behavior')">
+          <span class="setting-key">Flood behavior</span>
+          <span class="setting-val" id="sv-flood_behavior">reschedule to deliver w...</span>
+        </div>
+        <div class="setting-row" onclick="editSetting('moderation','Moderation')">
+          <span class="setting-key">Moderation</span>
+          <span class="setting-val" id="sv-moderation">Off</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:0 16px 20px">
+      <button class="btn" style="background:var(--danger);color:#fff" onclick="deleteCurrentRule()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- FILTERS -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="s-filters">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-rsettings')">‹</button>
+    <div class="hdr-title">Filters</div>
+    <button class="hdr-btn" onclick="toast('Filtrlash haqida ma\'lumot','ok')">?</button>
+  </div>
+  <div class="content" style="padding-bottom:80px">
+    <div style="padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px;color:var(--accent);cursor:pointer" onclick="toggleFilterInfo()">▶ Information</span>
+      <span style="font-size:14px;color:var(--accent);cursor:pointer">Need help?</span>
+    </div>
+    <div id="filter-info" style="display:none;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.6">
+      Filterlar qoidaga mos kelmagan xabarlarni bloklaydi. Bir nechta filter qo'shish mumkin. Ular AND mantiq bilan ishlaydi.
+    </div>
+    <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+      <input class="search-inp" id="filter-q" placeholder="Qidirish..." style="width:100%">
+    </div>
+    <div style="display:flex;padding:8px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)">
+      <span style="width:32px"></span><span style="flex:1;margin-left:40px">Tur</span><span>Qiymat</span>
+    </div>
+    <div id="filter-list"></div>
+  </div>
+  <div class="filter-toolbar">
+    <div id="ftype-display" class="filter-type-sel" onclick="toggleFTypeDrop()">
+      <span id="ftype-icon">🎯</span>
+      <span id="ftype-label" style="flex:1;font-size:13px">Exact text filter</span>
+      <span style="color:var(--muted);font-size:11px">▼</span>
+    </div>
+    <button class="ftb-btn" onclick="addFilter()" title="Qo'shish">＋</button>
+    <button class="ftb-btn" onclick="enableAllFilters()" title="Barchasini yoqish" style="font-size:14px">⬆</button>
+    <button class="ftb-btn" onclick="disableAllFilters()" title="Barchasini o'chirish" style="font-size:14px">⬇</button>
+    <button class="ftb-btn del" onclick="deleteAllFilters()" title="Barchasini o'chirish">Del</button>
+  </div>
+  <!-- Filter type dropdown -->
+  <div id="ftype-drop" style="display:none;position:fixed;bottom:72px;left:16px;right:16px;z-index:50;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:50vh;overflow-y:auto;box-shadow:0 -8px 24px rgba(0,0,0,.5)">
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- RULES LIST -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="s-rules">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-home')">‹</button>
+    <div class="hdr-title">My Forwarding Rules</div>
+    <button class="hdr-menu" onclick="openMenu()">☰</button>
+  </div>
+  <div class="content pb80" id="rules-list">
+    <div class="empty"><div class="ei">📭</div><p>Qoidalar yo'q</p></div>
+  </div>
+  <button class="fab" onclick="startFw()">+</button>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- BUNDLE MODAL -->
+<!-- ══════════════════════════════════════ -->
+<div class="modal-bg" id="m-bundle">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="float:right;cursor:pointer;font-size:18px;color:var(--muted)" onclick="closeModal('m-bundle')">✕</div>
+    <div class="modal-title">Tarif tanlang</div>
+    <div class="modal-sub">Turli tariflar turli manba turlari bilan ishlash imkonini beradi.<br><br><b>Expert</b> — istalgan manbalar, tezkor yetkazish, akkaunt ulash kerak.<br><b>Express</b> — faqat ochiq manbalarda yangi xabarlar.<br><b>Eski xabarlar</b> — faqat Direct yoki Expert tarifida.</div>
+    <button class="btn btn-p" onclick="doExpert()" style="margin-bottom:10px">Expert demosini olish</button>
+    <button class="btn btn-o" onclick="doExpress()">Express demosini olish</button>
+  </div>
+</div>
+
+<!-- EDIT SETTING MODAL -->
+<div class="modal-bg" id="m-edit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-title">Sozlama</div>
+    <div class="modal-sub" id="edit-sub"></div>
+    <input class="inp" id="edit-inp" style="margin-bottom:12px">
+    <button class="btn btn-p" onclick="saveEdit()" style="margin-bottom:8px">Saqlash</button>
+    <button class="btn btn-s" onclick="closeModal('m-edit')">Bekor qilish</button>
+  </div>
+</div>
+
+<!-- ADMIN ERROR MODAL -->
+<div class="modal-bg" id="m-admin">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="err-box" style="margin:0 0 16px">
+      <div class="err-title">❌ Qoidani yaratishda xato</div>
+      <div class="err-body" id="admin-err-body">Bot manzil chatda administrator bo'lishi kerak.<br><br>— Botni o'zim qo'sha olaman → "Botni admin qilish" tugmasi.<br>— Akkaunt nomidan nashr qila olaman → "Nomidan nashr..." tugmasi.</div>
+    </div>
+    <button class="btn btn-p" onclick="confirmAdmin()" style="margin-bottom:8px">✅ Botni admin qilib qo'shdim</button>
+    <button class="btn btn-p" onclick="publishOnBehalf()" style="margin-bottom:8px">👤 Nomidan nashr qilish</button>
+    <button class="btn btn-o" onclick="closeModal('m-admin')">Bekor qilish</button>
+  </div>
+</div>
+
+<div class="toast" id="tst"></div>
+
+<script>
+// ════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════
+const API = 'http://localhost:8000';
+let UID = 'demo_user';
+if(window.Telegram?.WebApp){
+  window.Telegram.WebApp.ready();
+  window.Telegram.WebApp.expand();
+  const u = window.Telegram.WebApp.initDataUnsafe?.user;
+  if(u) UID = String(u.id);
+}
+
+// ════════════════════════════════════
+// STATE
+// ════════════════════════════════════
+let allChats = [];
+let selSrc = null, selDst = null;
+let selDelivery = 'copy_bot';
+let phoneCodeHash = '';
+let pendingPhone = '';
+let rules = JSON.parse(localStorage.getItem('fb_rules')||'[]');
+let currentRuleIdx = -1;
+let ruleSettings = {};
+let activeFilters = [];
+let selectedFilterType = {icon:'🎯',label:'Exact text filter',val:'exact'};
+
+// ════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='s-home') loadHomeStatus();
+  if(id==='s-rules') renderRules();
+  if(id==='s-rsettings') renderRuleSettings();
+  if(id==='s-filters') renderFilters();
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function openModal(id){document.getElementById(id).classList.add('open')}
+
+// ════════════════════════════════════
+// TOAST
+// ════════════════════════════════════
+let _tt;
+function toast(msg,type='ok'){
+  const t=document.getElementById('tst');
+  t.textContent=msg; t.className=`toast show ${type}`;
+  clearTimeout(_tt); _tt=setTimeout(()=>t.className='toast',3000);
+}
+
+// ════════════════════════════════════
+// HOME
+// ════════════════════════════════════
+async function loadHomeStatus(){
+  try{
+    const r=await fetch(`${API}/auth/status/${UID}`);
+    const d=await r.json();
+    renderHomeConn(d);
+  }catch(e){
+    renderHomeConn({connected:false});
+  }
+}
+function renderHomeConn(d){
+  const el=document.getElementById('home-conn');
+  const av=document.getElementById('home-av');
+  if(d.connected){
+    const init=(d.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    av.textContent=init;
+    el.innerHTML=`<div class="conn-banner"><div class="dot-g"></div><div class="conn-info"><strong>${d.name||'Foydalanuvchi'}</strong><span>${d.phone||''}</span></div><button class="disc-btn" onclick="disconnect()">Uzish</button></div>`;
+  } else {
+    av.textContent='?'; el.innerHTML='';
+  }
+}
+async function disconnect(){
+  try{ await fetch(`${API}/auth/disconnect/${UID}`,{method:'POST'}); }catch(e){}
+  toast('Akkaunt uzildi','ok'); loadHomeStatus();
+}
+
+// ════════════════════════════════════
+// START FORWARD FLOW
+// ════════════════════════════════════
+async function startFw(){
+  let connected=false;
+  try{
+    const r=await fetch(`${API}/auth/status/${UID}`);
+    const d=await r.json();
+    connected=d.connected;
+  }catch(e){}
+  if(!connected){ openModal('m-bundle'); return; }
+  await loadChats();
+  go('s-src');
+}
+function doExpert(){
+  closeModal('m-bundle');
+  document.getElementById('conn-title').textContent='Expert (Trial)';
+  document.getElementById('conn-desc').innerHTML='✅ Cheksiz qoidalar<br>✅ Cheksiz xabarlar<br>✅ Tezkor yetkazish<br>✅ 40+ imkoniyat<br>✅ 7 kunlik sinov<br><br>🔒 Shaxsiy chatlar uchun akkaunt ulash kerak.';
+  setConnStep(1); go('s-connect');
+}
+function doExpress(){
+  closeModal('m-bundle');
+  document.getElementById('conn-title').textContent='Express Demo';
+  document.getElementById('conn-desc').textContent='Faqat ochiq manbalarda yangi xabarlar bilan ishlaydi.';
+  setConnStep(1); go('s-connect');
+}
+
+// ════════════════════════════════════
+// AUTH
+// ════════════════════════════════════
+function setConnStep(n){
+  ['st-phone','st-code','st-pass'].forEach((id,i)=>{
+    document.getElementById(id).style.display=i+1===n?'block':'none';
+  });
+  ['cst1','cst2','cst3'].forEach((id,i)=>{
+    document.getElementById(id).className='step'+(i+1<n?' done':i+1===n?' act':'');
+  });
+}
+async function sendCode(){
+  const phone=document.getElementById('inp-phone').value.trim();
+  if(!phone){toast('Telefon raqam kiriting','err');return;}
+  const btn=document.getElementById('btn-code');
+  btn.disabled=true; btn.textContent='Yuborilmoqda...';
+  try{
+    const r=await fetch(`${API}/auth/send_code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,phone})});
+    const d=await r.json();
+    if(d.ok){ pendingPhone=phone; phoneCodeHash=d.phone_code_hash; setConnStep(2); toast('Kod yuborildi ✅','ok'); }
+    else toast(d.detail||'Xato','err');
+  }catch(e){
+    // Demo: skip to chats
+    toast('Demo rejim ✅','ok');
+    setTimeout(async()=>{ await loadChats(); go('s-src'); },800);
+  }
+  btn.disabled=false; btn.textContent='Kod olish';
+}
+async function verifyCode(){
+  const code=document.getElementById('inp-code').value.trim();
+  if(code.length!==5){toast('5 xonali kod kiriting','err');return;}
+  try{
+    const r=await fetch(`${API}/auth/verify_code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,phone:pendingPhone,code,phone_code_hash:phoneCodeHash})});
+    const d=await r.json();
+    if(d.ok){ toast('✅ Ulandi!','ok'); await loadChats(); go('s-src'); }
+    else if(d.need_password){ setConnStep(3); }
+    else toast(d.detail||'Noto\'g\'ri kod','err');
+  }catch(e){ toast('Server bilan aloqa yo\'q','err'); }
+}
+async function verifyPass(){
+  const pw=document.getElementById('inp-pass').value;
+  if(!pw){toast('Parol kiriting','err');return;}
+  try{
+    const r=await fetch(`${API}/auth/verify_password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,password:pw})});
+    const d=await r.json();
+    if(d.ok){ toast('✅ Ulandi!','ok'); await loadChats(); go('s-src'); }
+    else toast('Noto\'g\'ri parol','err');
+  }catch(e){ toast('Xato','err'); }
+}
+function togglePass(){
+  const i=document.getElementById('inp-pass'),e=document.getElementById('eye-btn');
+  i.type=i.type==='password'?'text':'password'; e.textContent=i.type==='password'?'👁':'🙈';
+}
+
+// ════════════════════════════════════
+// CHATS
+// ════════════════════════════════════
+async function loadChats(){
+  try{
+    const r=await fetch(`${API}/chats/${UID}`);
+    const d=await r.json();
+    allChats=d.chats;
+  }catch(e){ loadDemoChats(); }
+  renderList('src'); renderList('dst');
+}
+function loadDemoChats(){
+  allChats=[
+    {id:'-1001',name:'Shaxsiy',type:'folder',members:5},
+    {id:'-1002',name:'Eski g va k',type:'folder',members:4},
+    {id:'-1003',name:'Kanallar',type:'folder',members:3},
+    {id:'-1004',name:'Guruhlar',type:'folder',members:1},
+    {id:'-1005',name:'Bot',type:'folder',members:13},
+    {id:'-1006',name:'💎',type:'folder',members:21},
+    {id:'-100100',name:'MADINA BREND Oilaviy kiyim',type:'channel',username:'@madina_brend'},
+    {id:'-100200',name:'TikTok TOP VIDEOLAR',type:'channel',username:'@prikollar_kulgi'},
+    {id:'-100300',name:'Gurlan Reklama va E\'lonlari',type:'channel',username:'@gurlan_elonlari'},
+    {id:'-100400',name:'SKINOZ UZ Chat',type:'group',username:'@skinoz_chat_uz'},
+    {id:'-100500',name:'Unversal tavarlar',type:'channel',username:'@optimtavarlar1717'},
+    {id:'-100600',name:'URGANCH GURLAN VIP TAXI',type:'group',username:'@gurlanurga'},
+    {id:'100700',name:'Jahongir',type:'private',username:'@Jahongir_1220'},
+    {id:'100800',name:'Telegram',type:'private'},
+    {id:'100900',name:'cheat',type:'group',username:'@uzcheats_admin'},
+  ];
+}
+function renderList(type){
+  const q=(document.getElementById(type==='src'?'src-q':'dst-q').value||'').toLowerCase();
+  const filtered=allChats.filter(c=>c.name.toLowerCase().includes(q));
+  const container=document.getElementById(type==='src'?'src-list':'dst-list');
+  let html='';
+  filtered.forEach(c=>{
+    const isFolder=c.type==='folder';
+    const icon=isFolder?'📁':c.type==='channel'?'📢':c.type==='group'?'👥':'👤';
+    const cls=isFolder?'':c.type==='channel'?'ch':c.type==='group'?'gr':'';
+    const sub=isFolder?`Papka • ${c.members} ta chat`:c.type==='channel'?`Kanal${c.username?' • '+c.username:''}`:c.type==='group'?`Guruh${c.username?' • '+c.username:''}`:c.username||'Shaxsiy';
+    const fn=type==='src'?'picSrc':'picDst';
+    html+=`<div class="chat-item" onclick="${fn}(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+      <div class="chat-av ${cls}">${icon}</div>
+      <div class="chat-info"><strong>${c.name}</strong><span>${sub}</span></div>
+      <span class="chev">›</span>
+    </div>`;
+  });
+  container.innerHTML=html||'<div class="empty"><div class="ei">🔍</div><p>Topilmadi</p></div>';
+}
+function filterList(type){ renderList(type); }
+function picSrc(c){ selSrc=c; renderList('dst'); go('s-dst'); }
+function picDst(c){
+  selDst=c;
+  document.getElementById('basic-route').innerHTML=
+    `<div style="font-size:13px;color:var(--muted);margin-bottom:4px">Dan: <span class="tag">${selSrc.name}</span></div>
+     <div style="font-size:13px;color:var(--muted);margin-top:4px">Ga: <strong style="color:var(--text)">${selDst.name}${selDst.username?' '+selDst.username:''}</strong></div>`;
+  document.getElementById('admin-err').innerHTML='';
+  go('s-basic');
+}
+
+// ════════════════════════════════════
+// DELIVERY DROPDOWN
+// ════════════════════════════════════
+const delLabels={copy_bot:'Copy via bot',copy_acc:'Copy via account',fwd_acc:'Forward via account',fwd_copy:'Forward (copy if restricted) via account',copy_fwd:'Copy common and forward forwarded via account',copy_flood:'Copy via account, on flood via bot'};
+function toggleDelDrop(){
+  const d=document.getElementById('del-drop');
+  d.style.display=d.style.display==='none'?'block':'none';
+}
+function selDel(el){
+  selDelivery=el.dataset.v;
+  document.getElementById('del-display').textContent=delLabels[selDelivery];
+  document.querySelectorAll('#del-drop .dd-item').forEach(i=>{
+    i.className='dd-item'+(i.dataset.v===selDelivery?' selected':'');
+    i.querySelector('.dd-check').textContent=i.dataset.v===selDelivery?'✓':'';
+  });
+  document.getElementById('del-drop').style.display='none';
+}
+function showDeliveryInfo(){ toast('Yetkazish rejimi haqida ma\'lumot','ok'); }
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#del-display')&&!e.target.closest('#del-drop')){
+    const d=document.getElementById('del-drop');
+    if(d) d.style.display='none';
+  }
+  if(!e.target.closest('#ftype-display')&&!e.target.closest('#ftype-drop')){
+    const d=document.getElementById('ftype-drop');
+    if(d) d.style.display='none';
+  }
+});
+
+// ════════════════════════════════════
+// CREATE RULE
+// ════════════════════════════════════
+async function createRule(){
+  if(!selSrc||!selDst){toast('Manba va manzilni tanlang','err');return;}
+  const rule={
+    id:Date.now().toString(),
+    source_id:selSrc.id, source_name:selSrc.name,
+    dest_id:selDst.id, dest_name:selDst.name,
+    delivery:selDelivery,
+    fw_type:document.getElementById('sel-fwtype').value,
+    links:document.getElementById('sel-links').value,
+    active:true, count:0, filters:[],
+    settings:{},
+    created:new Date().toLocaleDateString('uz-UZ')
+  };
+  try{
+    const r=await fetch(`${API}/rules/add`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,...rule})});
+    const d=await r.json();
+    if(d.ok){ rules.push(rule); saveRules(); toast('✅ Qoida yaratildi!','ok'); go('s-rsettings'); }
+    else showAdminModal();
+  }catch(e){
+    // demo
+    rules.push(rule); saveRules();
+    currentRuleIdx=rules.length-1;
+    toast('✅ Qoida yaratildi!','ok');
+    go('s-rsettings');
+  }
+}
+function saveRules(){ localStorage.setItem('fb_rules',JSON.stringify(rules)); }
+function showAdminModal(){ openModal('m-admin'); }
+function confirmAdmin(){
+  closeModal('m-admin');
+  const rule={
+    id:Date.now().toString(),
+    source_id:selSrc.id, source_name:selSrc.name,
+    dest_id:selDst.id, dest_name:selDst.name,
+    delivery:selDelivery, fw_type:'new', links:'leave',
+    active:true, count:0, filters:[], settings:{},
+    created:new Date().toLocaleDateString('uz-UZ')
+  };
+  rules.push(rule); saveRules();
+  currentRuleIdx=rules.length-1;
+  toast('✅ Bot admin qilib qo\'shildi!','ok');
+  go('s-rsettings');
+}
+function publishOnBehalf(){ closeModal('m-admin'); selDelivery='copy_acc'; createRule(); }
+
+// ════════════════════════════════════
+// RULES LIST
+// ════════════════════════════════════
+function renderRules(){
+  const el=document.getElementById('rules-list');
+  if(!rules.length){
+    el.innerHTML='<div class="empty"><div class="ei">📭</div><p>Hali qoidalar yo\'q</p><p style="font-size:13px;margin-top:6px">+ tugmasini bosib yarating</p></div>';
+    return;
+  }
+  let html='<div style="padding-top:10px">';
+  rules.forEach((r,i)=>{
+    const on=r.active!==false;
+    html+=`<div class="rule-card ${on?'':'off'}" onclick="openRule(${i})">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div class="${on?'dot-g':'dot-r'}"></div>
+        <span class="tag" style="max-width:120px">${r.source_name||r.source_id}</span>
+        <span style="color:var(--muted);font-size:12px">→</span>
+        <span class="tag" style="max-width:120px">${r.dest_name||r.dest_id}</span>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <div class="icon-btn" onclick="event.stopPropagation();toggleRule(${i})">${on?'⏸':'▶️'}</div>
+          <div class="icon-btn" onclick="event.stopPropagation();delRule(${i})">🗑</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="badge">📊 ${r.count||0} ta</span>
+        <span class="badge">📅 ${r.created||'-'}</span>
+        <span class="badge">⚙️ ${delLabels[r.delivery]||r.delivery||'copy_bot'}</span>
+        ${r.filters?.length?`<span class="badge">🔍 ${r.filters.length} filter</span>`:''}
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+function openRule(i){ currentRuleIdx=i; ruleSettings=rules[i].settings||{}; activeFilters=[...(rules[i].filters||[])]; go('s-rsettings'); }
+function toggleRule(i){ rules[i].active=!rules[i].active; saveRules(); renderRules(); toast(rules[i].active?'▶️ Yoqildi':'⏸ To\'xtatildi','ok'); }
+function delRule(i){ if(!confirm('Qoidani o\'chirish?'))return; rules.splice(i,1); saveRules(); renderRules(); toast('🗑 O\'chirildi','ok'); }
+function deleteCurrentRule(){ if(currentRuleIdx>=0){ rules.splice(currentRuleIdx,1); saveRules(); toast('🗑 O\'chirildi','ok'); go('s-rules'); } }
+
+// ════════════════════════════════════
+// RULE SETTINGS
+// ════════════════════════════════════
+function renderRuleSettings(){
+  if(currentRuleIdx<0)return;
+  const r=rules[currentRuleIdx];
+  document.getElementById('rs-route').innerHTML=
+    `<span style="font-size:13px">Dan: </span><span class="tag">${r.source_name}</span>
+     <span style="font-size:13px;margin:0 6px">⚙️</span>
+     <br style="margin:4px 0">
+     <span style="font-size:13px">Ga: </span><strong>${r.dest_name}${r.dest_username?' ('+r.dest_username+')':''}</strong>
+     <span style="font-size:13px;margin-left:4px">⚙️</span>`;
+  // Refresh toggle states
+  ['processing_report','sync_del','google_drive','pin','silent'].forEach(k=>{
+    const el=document.getElementById('tgl-'+k);
+    if(el){ const v=ruleSettings[k]; el.className='toggle'+(v?' on':''); }
+  });
+  // Update filter count
+  const fi=document.getElementById('sv-filters');
+  if(fi) fi.textContent=activeFilters.length;
+}
+function toggleSec(id){
+  const body=document.getElementById('body-'+id);
+  const arr=document.getElementById('arr-'+id);
+  body.classList.toggle('open');
+  arr.classList.toggle('open');
+}
+function toggleBool(key){
+  ruleSettings[key]=!ruleSettings[key];
+  const el=document.getElementById('tgl-'+key);
+  if(el) el.className='toggle'+(ruleSettings[key]?' on':'');
+  if(currentRuleIdx>=0){ rules[currentRuleIdx].settings=ruleSettings; saveRules(); }
+}
+let editKey='';
+function editSetting(key,label){
+  editKey=key;
+  document.getElementById('edit-title').textContent=label;
+  document.getElementById('edit-inp').value=ruleSettings[key]||document.getElementById('sv-'+key)?.textContent||'';
+  openModal('m-edit');
+}
+function saveEdit(){
+  const val=document.getElementById('edit-inp').value;
+  ruleSettings[editKey]=val;
+  const sv=document.getElementById('sv-'+editKey);
+  if(sv) sv.textContent=val;
+  if(currentRuleIdx>=0){ rules[currentRuleIdx].settings=ruleSettings; saveRules(); }
+  closeModal('m-edit'); toast('✅ Saqlandi','ok');
+}
+function filterSettings(){
+  const q=document.getElementById('rs-q').value.toLowerCase();
+  document.querySelectorAll('.setting-row').forEach(row=>{
+    row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+// ════════════════════════════════════
+// FILTERS
+// ════════════════════════════════════
+const filterTypes=[
+  {icon:'🎯',label:'Exact text filter',val:'exact'},
+  {icon:'🔍',label:'RegEx filter',val:'regex'},
+  {icon:'🕐',label:'Date/time filter',val:'datetime'},
+  {icon:'💬',label:'Topic filter',val:'topic'},
+  {icon:'👤',label:'Author filter',val:'author'},
+  {icon:'👁',label:'Min. views',val:'min_views'},
+  {icon:'❤️',label:'Min. reactions',val:'min_reactions'},
+  {icon:'➡️',label:'Min. forwards',val:'min_forwards'},
+  {icon:'💬',label:'Min. replies',val:'min_replies'},
+  {icon:'❤️/👁',label:'Min. reactions to views',val:'react_views'},
+  {icon:'➡️/👁',label:'Min. forwards to views',val:'fwd_views'},
+  {icon:'💬/👁',label:'Min. replies to views',val:'rep_views'},
+];
+function buildFTypeDropdown(){
+  const el=document.getElementById('ftype-drop');
+  el.innerHTML=filterTypes.map(ft=>`
+    <div class="dd-item ${ft.val===selectedFilterType.val?'selected':''}" onclick="selFType(${JSON.stringify(ft).replace(/"/g,'&quot;')})">
+      <span style="font-size:18px">${ft.icon}</span>
+      <span>${ft.label}</span>
+      ${ft.val===selectedFilterType.val?'<span style="margin-left:auto;color:var(--accent)">✓</span>':''}
+    </div>`).join('');
+}
+function toggleFTypeDrop(){
+  const d=document.getElementById('ftype-drop');
+  if(d.style.display==='none'){ buildFTypeDropdown(); d.style.display='block'; }
+  else d.style.display='none';
+}
+function selFType(ft){
+  selectedFilterType=ft;
+  document.getElementById('ftype-icon').textContent=ft.icon;
+  document.getElementById('ftype-label').textContent=ft.label;
+  document.getElementById('ftype-drop').style.display='none';
+}
+function addFilter(){
+  activeFilters.push({type:selectedFilterType.val,icon:selectedFilterType.icon,label:selectedFilterType.label,value:'',enabled:true});
+  if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); }
+  renderFilters();
+  // Update count in settings
+  const fi=document.getElementById('sv-filters');
+  if(fi) fi.textContent=activeFilters.length;
+}
+function renderFilters(){
+  const el=document.getElementById('filter-list');
+  if(!activeFilters.length){
+    el.innerHTML=''; return;
+  }
+  el.innerHTML=activeFilters.map((f,i)=>`
+    <div class="filter-row">
+      <div class="f-check ${f.enabled?'on':''}" onclick="toggleFilter(${i})">
+        ${f.enabled?'<span style="color:#fff;font-size:12px">✓</span>':''}
+      </div>
+      <span class="f-type-icon">${f.icon}</span>
+      <input class="f-val-inp" value="${f.value}" placeholder="Qiymat..." oninput="updateFilterVal(${i},this.value)">
+      <button class="f-ok" onclick="saveFilterVal(${i})">✓</button>
+      <button class="f-del" onclick="removeFilter(${i})">✕</button>
+    </div>`).join('');
+}
+function toggleFilter(i){
+  activeFilters[i].enabled=!activeFilters[i].enabled;
+  if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); }
+  renderFilters();
+}
+function updateFilterVal(i,v){ activeFilters[i].value=v; }
+function saveFilterVal(i){
+  if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); }
+  toast('✅ Saqlandi','ok');
+}
+function removeFilter(i){
+  activeFilters.splice(i,1);
+  if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); }
+  renderFilters();
+  const fi=document.getElementById('sv-filters');
+  if(fi) fi.textContent=activeFilters.length;
+}
+function enableAllFilters(){ activeFilters.forEach(f=>f.enabled=true); syncFilters(); renderFilters(); toast('Barchasi yoqildi','ok'); }
+function disableAllFilters(){ activeFilters.forEach(f=>f.enabled=false); syncFilters(); renderFilters(); toast('Barchasi o\'chirildi','ok'); }
+function deleteAllFilters(){ if(!confirm('Barcha filterni o\'chirish?'))return; activeFilters=[]; syncFilters(); renderFilters(); toast('O\'chirildi','ok'); }
+function syncFilters(){ if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); } }
+function toggleFilterInfo(){
+  const el=document.getElementById('filter-info');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+loadDemoChats();
+loadHomeStatus();
+</script>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MENU PANEL (sidebar) -->
+<!-- ══════════════════════════════════════ -->
+<div class="modal-bg" id="m-menu">
+  <div class="modal" style="border-radius:20px 20px 0 0">
+    <div class="modal-handle"></div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:16px">Menyu</div>
+    <div class="card" style="margin:0 0 10px">
+      <div class="card-row" onclick="closeModal('m-menu');go('s-home')">
+        <span style="font-size:20px">🏠</span>
+        <div style="flex:1"><strong>Bosh sahifa</strong></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="card-row" onclick="closeModal('m-menu');go('s-rules')">
+        <span style="font-size:20px">📋</span>
+        <div style="flex:1"><strong>Qoidalar</strong></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="card-row" onclick="closeModal('m-menu');startFw()">
+        <span style="font-size:20px">➕</span>
+        <div style="flex:1"><strong>Yangi qoida</strong></div>
+        <span class="chev">›</span>
+      </div>
+    </div>
+    <div id="menu-conn-info" style="margin-bottom:12px"></div>
+    <button class="btn btn-o" onclick="closeModal('m-menu')">Yopish</button>
+  </div>
+</div>
+<script>
+function openMenu(){
+  // Menu conn info yangilash
+  const el = document.getElementById('menu-conn-info');
+  const data = load_local_status();
+  if(data){ el.innerHTML = `<div class="conn-banner"><div class="dot-g"></div><div class="conn-info"><strong>${data.name||'Foydalanuvchi'}</strong><span>${data.phone||''}</span></div><button class="disc-btn" onclick="disconnect()">Uzish</button></div>`; }
+  openModal('m-menu');
+}
+function load_local_status(){ return null; }
+</script>
+</body>
+</html>
