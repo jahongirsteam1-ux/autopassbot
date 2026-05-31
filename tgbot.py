@@ -1,14 +1,9 @@
-"""
-Auto Chek Bot — Telegram Bot
-Mini App launcher + admin commands
-"""
-
 import os, logging
 from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup, MenuButtonWebApp
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8881052991:AAFopltZG0q4s8vnIkK76GSHCwE9X5qp9aM")
-MINI_APP_URL = os.getenv("MINI_APP_URL", "https://jahongirsteam1-ux.github.io/avtopass_bot/")
+BOT_TOKEN = "8881052991:AAFop1tZG0q4s8vnIkK76GSHCwE9X5qp9aM"
+MINI_APP_URL = "https://jahongirsteam1-ux.github.io/avtopass_bot/"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,7 +13,6 @@ async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         InlineKeyboardButton("🚀 Tizimga kirish", web_app=WebAppInfo(url=MINI_APP_URL))
     ]])
     
-    # Xabarni yanada chiroyli va tushunarli qilib HTML formatida yozdim
     text = (
         f"<b>👋 Salom, {u.first_name}!</b>\n\n"
         "<b>Auto Chek Bot</b> ga xush kelibsiz.\n"
@@ -26,10 +20,10 @@ async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         "monitoring qilishda yordam beraman.\n\n"
         "<i>Tizimga kirish uchun quyidagi tugmani bosing:</i>"
     )
-    
+
     await update.message.reply_text(
-        text, 
-        parse_mode="HTML", 
+        text,
+        parse_mode="HTML",
         reply_markup=kb
     )
 
