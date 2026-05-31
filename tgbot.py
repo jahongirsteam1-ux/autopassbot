@@ -7,8 +7,8 @@ import os, logging
 from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup, MenuButtonWebApp
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
-MINI_APP_URL = os.getenv("MINI_APP_URL", "https://your-app.netlify.app")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8881052991:AAFopltZG0q4s8vnIkK76GSHCwE9X5qp9aM")
+MINI_APP_URL = os.getenv("MINI_APP_URL", "https://jahongirsteam1-ux.github.io/avtopass_bot/")
 
 logging.basicConfig(level=logging.INFO)
 
