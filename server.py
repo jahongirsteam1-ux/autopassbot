@@ -5,14 +5,20 @@ ForwardBot Backend v3 — To'liq tuzatilgan
 - Barcha endpoint ishlaydi
 """
 import asyncio, json, os, logging, re
+from dotenv import load_dotenv
+load_dotenv()
+
 from typing import Optional, Dict, List, Any
 from pathlib import Path
 from datetime import datetime
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
@@ -29,6 +35,10 @@ API_HASH = os.getenv("API_HASH", "your_api_hash")
 DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
 DATA_DIR.mkdir(exist_ok=True)
 
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8881052991:AAFop1tZG0q4s8vnIkK76GSHCwE9X5qp9aM")
+MINI_APP_URL = os.getenv("MINI_APP_URL", "https://jahongirsteam1-ux.github.io/avtopass_bot/")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://avtopassbot-production.up.railway.app")
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("forwardbot")
 
@@ -42,10 +52,115 @@ pending: Dict[str, dict] = {}
 # Registered handlers: {uid: bool} — duplicate oldini olish
 handlers_registered: set = set()
 
+# PTB Bot ilovasi
+ptb_app = Application.builder().token(BOT_TOKEN).build()
+
+async def start_cmd(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    u = update.effective_user
+    kb = InlineKeyboardMarkup([[
+        InlineKeyboardButton("🚀 Tizimga kirish", web_app=WebAppInfo(url=MINI_APP_URL))
+    ]])
+    text = (
+        f"<b>👋 Salom, {u.first_name}!</b>\n\n"
+        "<b>Auto Chek Bot</b> ga xush kelibsiz.\n"
+        "<i>Tizimga kirish uchun quyidagi tugmani bosing:</i>"
+    )
+    await update.message.reply_text(text, parse_mode="HTML", reply_markup=kb)
+
+ptb_app.add_handler(CommandHandler("start", start_cmd))
+
+from telegram.ext import MessageHandler, filters
+async def channel_post_handler(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    msg = update.channel_post
+    if not msg: return
+    admin_cfg = load_admin()
+    target_id = str(admin_cfg.get("channel_id", ""))
+    if not target_id or str(msg.chat_id) != target_id: return
+    text = msg.text or msg.caption or ""
+    
+    match = re.search(r"\+\s*([\d\s.,]+?)\s*UZS", text, re.IGNORECASE)
+    if not match: return
+    
+    raw = match.group(1).replace(",", "").replace(".", "").replace(" ", "")
+    try: amount = int(raw)
+    except: return
+    
+    pending = load_pending()
+    found_key = None
+    for k, v in pending.items():
+        if v.get("amount") == amount:
+            found_key = k
+            break
+            
+    if found_key:
+        p_data = pending.pop(found_key)
+        save_pending(pending)
+        uid = p_data["user_id"]
+        months = p_data["months"]
+        subs = load_subs()
+        user_sub = subs.get(uid, {})
+        now = datetime.now().timestamp()
+        current_exp = user_sub.get("expires_at", now)
+        if current_exp < now: current_exp = now
+        user_sub["expires_at"] = current_exp + (months * 30 * 24 * 3600)
+        user_sub["phone"] = p_data.get("phone", user_sub.get("phone", ""))
+        user_sub["name"] = p_data.get("name", user_sub.get("name", ""))
+        user_sub["username"] = p_data.get("username", user_sub.get("username", ""))
+        subs[uid] = user_sub
+        save_subs(subs)
+        try:
+            await ctx.bot.send_message(
+                chat_id=uid,
+                text=f"✅ To'lovingiz tasdiqlandi! ({amount} so'm)\nSizning obunangiz {months} oyga uzaytirildi!"
+            )
+        except: pass
+
+ptb_app.add_handler(MessageHandler(filters.ChatType.CHANNEL, channel_post_handler))
+
+
+
 # ═══════════════════════════════════════
 # DATA
 # ═══════════════════════════════════════
 def ufile(uid): return DATA_DIR / f"{uid}.json"
+
+
+def load_admin():
+    f = DATA_DIR / "admin.json"
+    if f.exists():
+        try: return json.loads(f.read_text("utf-8"))
+        except: pass
+    return {"password": "admin", "channel_id": "", "monthly_price": 15000}
+
+def save_admin(data):
+    (DATA_DIR / "admin.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+
+def load_subs():
+    f = DATA_DIR / "subscriptions.json"
+    if f.exists():
+        try: return json.loads(f.read_text("utf-8"))
+        except: pass
+    return {}
+
+def save_subs(data):
+    (DATA_DIR / "subscriptions.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+
+def load_pending():
+    f = DATA_DIR / "pending_payments.json"
+    if f.exists():
+        try: return json.loads(f.read_text("utf-8"))
+        except: pass
+    return {}
+
+def save_pending(data):
+    (DATA_DIR / "pending_payments.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+
+def check_sub(uid: str) -> bool:
+    if uid == "demo_user": return True
+    subs = load_subs()
+    user_sub = subs.get(uid)
+    if not user_sub: return False
+    return datetime.now().timestamp() < user_sub.get("expires_at", 0)
 
 def load(uid):
     f = ufile(uid)
@@ -69,6 +184,22 @@ class CodeReq(BaseModel):
     phone: str
     code: str
     phone_code_hash: str
+
+
+class AdminLogin(BaseModel):
+    password: str
+
+class AdminSettings(BaseModel):
+    password: str
+    channel_id: str
+    monthly_price: int
+
+class SubRequest(BaseModel):
+    user_id: str
+    months: int
+    phone: str = ""
+    name: str = ""
+    username: str = ""
 
 class PassReq(BaseModel):
     user_id: str
@@ -167,6 +298,8 @@ def register_handler(uid: str, client: TelegramClient):
                     sender_name = " ".join(p for p in parts if p)
             except: pass
 
+            if not check_sub(uid):
+                continue
             if not check_filters(text, views, reactions, sender_name, rule.get("filters", [])):
                 continue
 
@@ -257,6 +390,16 @@ async def get_client(uid: str) -> Optional[TelegramClient]:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("ForwardBot backend ishga tushdi!")
+    
+    # Telegram Bot webhook o'rnatish
+    try:
+        await ptb_app.bot.set_webhook(f"{WEBHOOK_URL}/webhook")
+        await ptb_app.initialize()
+        await ptb_app.start()
+        log.info(f"Webhook o'rnatildi: {WEBHOOK_URL}/webhook")
+    except Exception as e:
+        log.error(f"Webhook o'rnatishda xatolik: {e}")
+
     # Barcha saqlangan sessionlarni tiklash
     for f in DATA_DIR.glob("*.json"):
         uid = f.stem
@@ -274,9 +417,22 @@ async def lifespan(app: FastAPI):
         try: await c.disconnect()
         except: pass
     log.info("Barcha clientlar yopildi")
+    
+    # Botni to'xtatish
+    try:
+        await ptb_app.stop()
+        await ptb_app.shutdown()
+    except: pass
 
 app = FastAPI(title="ForwardBot API", version="3.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+@app.post("/webhook")
+async def webhook(request: Request):
+    data = await request.json()
+    update = Update.de_json(data, ptb_app.bot)
+    await ptb_app.process_update(update)
+    return {"ok": True}
 
 # ═══════════════════════════════════════
 # AUTH
@@ -404,6 +560,8 @@ async def get_chats(uid: str, q: str = ""):
 # ═══════════════════════════════════════
 @app.post("/rules/add")
 async def add_rule(req: RuleReq):
+    if not check_sub(req.user_id):
+        raise HTTPException(status_code=403, detail="Obuna muddati tugagan. Iltimos, obuna sotib oling.")
     data = load(req.user_id)
     rule = {
         "id": datetime.now().strftime("%Y%m%d%H%M%S%f"),
