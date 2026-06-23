@@ -6,6 +6,7 @@
 <title>ForwardBot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -108,6 +109,44 @@ body{
   transition:all .2s;
 }
 .hdr-menu:active{background:var(--surface3)}
+
+
+/* ─── ADMIN & SUB STYLES ────── */
+.admin-tab-bar {
+  display: flex; gap: 12px; overflow-x: auto; padding: 20px 16px; border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+}
+.admin-tab-bar::-webkit-scrollbar { display: none; }
+.admin-tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  width: 78px; height: 78px; border-radius: var(--r-lg);
+  background: transparent; border: 1.5px solid transparent; color: var(--muted);
+  font-size: 10px; font-weight: 700; cursor: pointer; transition: all .2s; flex-shrink: 0;
+}
+.admin-tab.act { background: var(--surface2); border-color: rgba(255,255,255,0.05); color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.admin-tab .icon-box {
+  width: 32px; height: 32px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; transition: transform .2s;
+}
+.admin-tab.act .icon-box { transform: scale(1.15); }
+.admin-panel-content { display: none; padding: 14px 16px; }
+.admin-panel-content.act { display: block; }
+.stat-box {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 16px;
+  display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 45%;
+}
+.stat-val { font-size: 24px; font-weight: 800; color: var(--text); }
+.stat-lbl { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.user-row { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px; margin-bottom: 10px; }
+.user-row strong { display: block; font-size: 14px; margin-bottom: 4px; }
+.user-row span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.pay-box { background: var(--surface2); border: 1px solid var(--warn-dim); border-radius: var(--r-md); padding: 14px; margin-bottom: 10px; }
+.sub-plan-card {
+  background: var(--surface2); border: 2px solid var(--border-bright); border-radius: var(--r-lg); padding: 20px;
+  text-align: center; cursor: pointer; transition: all .2s; margin-bottom: 14px;
+}
+.sub-plan-card.sel { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 4px 20px var(--accent-glow); }
+.sub-price { font-size: 28px; font-weight: 800; color: var(--text); margin: 8px 0; }
 
 /* ─── CONTENT ─────────────────── */
 .content{flex:1;overflow-y:auto;padding-bottom:20px}
@@ -763,6 +802,15 @@ body{
       <div class="feat-chev"><i class="fa-solid fa-chevron-right"></i></div>
     </div>
 
+    <div class="feat-card" onclick="go('s-profile')">
+      <div class="feat-icon" style="background:rgba(155,89,182,.15);color:#9b59b6"><i class="fa-solid fa-user"></i></div>
+      <div class="feat-body">
+        <strong>Profil va Obuna</strong>
+        <span>Obuna holati va karta orqali to'lov</span>
+      </div>
+      <div class="feat-chev"><i class="fa-solid fa-chevron-right"></i></div>
+    </div>
+
     <div class="feat-card" onclick="go('s-rules')">
       <div class="feat-icon green"><i class="fa-solid fa-list-check"></i></div>
       <div class="feat-body">
@@ -804,24 +852,19 @@ body{
         <i class="fa-solid fa-arrow-right"></i> Kod olish
       </button>
       <div class="info-links" style="margin-top:20px">
-        <div class="ilink">
+        <div class="ilink" onclick="if(window.COMMUNITY_LINK) { window.Telegram.WebApp.openTelegramLink(window.COMMUNITY_LINK); } else { toast('Guruh havolasi hozircha kiritilmagan!', 'err'); }">
           <div class="ilink-ic" style="background:var(--accent-dim)"><i class="fa-brands fa-telegram" style="color:var(--accent)"></i></div>
           <div class="ilink-text"><strong>Telegram Community</strong><span>8000 dan ortiq a'zo</span></div>
           <span class="ilink-chev"><i class="fa-solid fa-chevron-right"></i></span>
         </div>
-        <div class="ilink">
+        <div class="ilink" onclick="openModal('m-why')">
           <div class="ilink-ic" style="background:var(--accent-dim)"><i class="fa-solid fa-lock" style="color:var(--accent)"></i></div>
           <div class="ilink-text"><strong>Nima uchun ulash kerak?</strong><span>Qanday ishlaydi</span></div>
           <span class="ilink-chev"><i class="fa-solid fa-chevron-right"></i></span>
         </div>
-        <div class="ilink">
-          <div class="ilink-ic" style="background:var(--warn-dim)"><i class="fa-solid fa-bolt" style="color:var(--warn)"></i></div>
-          <div class="ilink-text"><strong>Junctionbot.io</strong><span>Xavfsizlik kafolati</span></div>
-          <span class="ilink-chev"><i class="fa-solid fa-chevron-right"></i></span>
-        </div>
-        <div class="ilink">
+        <div class="ilink" onclick="openModal('m-about')">
           <div class="ilink-ic" style="background:var(--success-dim)"><i class="fa-solid fa-users" style="color:var(--success)"></i></div>
-          <div class="ilink-text"><strong>Biz haqimizda</strong><span>2017 yildan faoliyat yuritamiz</span></div>
+          <div class="ilink-text"><strong>Biz haqimizda</strong><span>Professional tizim</span></div>
           <span class="ilink-chev"><i class="fa-solid fa-chevron-right"></i></span>
         </div>
       </div>
@@ -976,32 +1019,32 @@ body{
     <div class="card">
       <div class="sec-header" onclick="toggleSec('fwd')">
         <div class="sec-icon blue"><i class="fa-solid fa-paper-plane"></i></div>
-        <span class="sec-title">Forwarding</span>
+        <span class="sec-title">Yuborish (Forwarding)</span>
         <div class="sec-arrow open" id="arr-fwd"><i class="fa-solid fa-chevron-down"></i></div>
       </div>
       <div class="sec-body open" id="body-fwd">
-        <div class="setting-row" onclick="editSetting('mode','Forwarding mode')">
-          <span class="setting-key">Forwarding mode</span>
+        <div class="setting-row" onclick="editSetting('mode','Yuborish rejimi')">
+          <span class="setting-key">Yuborish rejimi</span>
           <span class="setting-val" id="sv-mode">new</span>
         </div>
-        <div class="setting-row" onclick="editSetting('receipt_delays','Receipt delays')">
-          <span class="setting-key">Receipt delays</span>
+        <div class="setting-row" onclick="editSetting('receipt_delays','Kechikish vaqti (sekundlarda, masalan: 5 yoki 10)')">
+          <span class="setting-key">Xabarni kechiktirib yuborish (Timer)</span>
           <span class="setting-val" id="sv-receipt_delays">0</span>
         </div>
-        <div class="setting-row" onclick="editSetting('sync_edits','Sync edits')">
-          <span class="setting-key">Sync edits</span>
+        <div class="setting-row" onclick="editSetting('sync_edits','Tahrirlashlarni sinxronlash')">
+          <span class="setting-key">Tahrirlashlarni sinxronlash</span>
           <span class="setting-val" id="sv-sync_edits">edit</span>
         </div>
-        <div class="setting-row" onclick="toggleBool('processing_report','Processing report')">
-          <span class="setting-key">Processing report</span>
+        <div class="setting-row" onclick="toggleBool('processing_report','Jarayon hisoboti')">
+          <span class="setting-key">Jarayon hisoboti</span>
           <div class="toggle" id="tgl-processing_report"></div>
         </div>
-        <div class="setting-row" onclick="toggleBool('sync_del','Sync deletions')">
-          <span class="setting-key">Sync deletions</span>
+        <div class="setting-row" onclick="toggleBool('sync_del','O\'chirishlarni sinxronlash')">
+          <span class="setting-key">O'chirishlarni sinxronlash</span>
           <div class="toggle" id="tgl-sync_del"></div>
         </div>
-        <div class="setting-row" onclick="editSetting('delayed_del','Delayed deletion')">
-          <span class="setting-key">Delayed deletion</span>
+        <div class="setting-row" onclick="editSetting('delayed_del','Kechiktirib o\'chirish')">
+          <span class="setting-key">Kechiktirib o'chirish</span>
           <span class="setting-val" id="sv-delayed_del">0</span>
         </div>
       </div>
@@ -1011,36 +1054,36 @@ body{
     <div class="card">
       <div class="sec-header" onclick="toggleSec('fil')">
         <div class="sec-icon purple"><i class="fa-solid fa-filter"></i></div>
-        <span class="sec-title">Filtering</span>
+        <span class="sec-title">Filtrlash (Filtering)</span>
         <div class="sec-arrow open" id="arr-fil"><i class="fa-solid fa-chevron-down"></i></div>
       </div>
       <div class="sec-body open" id="body-fil">
         <div class="setting-row" onclick="go('s-filters')">
-          <span class="setting-key"><i class="fa-solid fa-sliders" style="color:var(--accent);margin-right:6px;font-size:12px"></i>Filters</span>
+          <span class="setting-key"><i class="fa-solid fa-sliders" style="color:var(--accent);margin-right:6px;font-size:12px"></i>Filtrlar</span>
           <span class="setting-val" id="sv-filters">0</span>
         </div>
-        <div class="setting-row" onclick="editSetting('duplicates','Duplicates')">
-          <span class="setting-key">Duplicates</span>
+        <div class="setting-row" onclick="editSetting('duplicates','Takrorlangan xabarlar')">
+          <span class="setting-key">Takrorlangan xabarlar</span>
           <span class="setting-val" id="sv-duplicates">pass</span>
         </div>
-        <div class="setting-row" onclick="editSetting('my_messages','My messages')">
-          <span class="setting-key">My messages</span>
+        <div class="setting-row" onclick="editSetting('my_messages','O\'z xabarlarim')">
+          <span class="setting-key">O'z xabarlarim</span>
           <span class="setting-val" id="sv-my_messages">filter</span>
         </div>
-        <div class="setting-row" onclick="editSetting('filter_interval','Filter-interval')">
-          <span class="setting-key">Filter-interval</span>
+        <div class="setting-row" onclick="editSetting('filter_interval','Filtr intervali')">
+          <span class="setting-key">Filtr intervali</span>
           <span class="setting-val" id="sv-filter_interval">0</span>
         </div>
-        <div class="setting-row" onclick="editSetting('filter_order','Filtering order')">
-          <span class="setting-key">Filtering order</span>
+        <div class="setting-row" onclick="editSetting('filter_order','Filtrlash tartibi')">
+          <span class="setting-key">Filtrlash tartibi</span>
           <span class="setting-val" id="sv-filter_order">after_replacements</span>
         </div>
-        <div class="setting-row" onclick="editSetting('filter_fwd','Filter forwards')">
-          <span class="setting-key">Filter forwards</span>
+        <div class="setting-row" onclick="editSetting('filter_fwd','Forwardlarni filtrlash')">
+          <span class="setting-key">Forwardlarni filtrlash</span>
           <span class="setting-val" id="sv-filter_fwd">all</span>
         </div>
-        <div class="setting-row" onclick="editSetting('delay_filter','Delay and delayed filter')">
-          <span class="setting-key">Delay and delayed filter</span>
+        <div class="setting-row" onclick="editSetting('delay_filter','Kechiktirilgan filtr')">
+          <span class="setting-key">Kechiktirilgan filtr</span>
           <span class="setting-val" id="sv-delay_filter">0</span>
         </div>
       </div>
@@ -1050,24 +1093,24 @@ body{
     <div class="card">
       <div class="sec-header" onclick="toggleSec('src')">
         <div class="sec-icon green"><i class="fa-solid fa-database"></i></div>
-        <span class="sec-title">Source data</span>
+        <span class="sec-title">Manba ma'lumotlari</span>
         <div class="sec-arrow open" id="arr-src"><i class="fa-solid fa-chevron-down"></i></div>
       </div>
       <div class="sec-body open" id="body-src">
-        <div class="setting-row" onclick="editSetting('orig_link','Original message link')">
-          <span class="setting-key">Original message link</span>
+        <div class="setting-row" onclick="editSetting('orig_link','Asl xabar havolasi')">
+          <span class="setting-key">Asl xabar havolasi</span>
           <span class="setting-val" id="sv-orig_link">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('source_name','Source name')">
-          <span class="setting-key">Source name</span>
+        <div class="setting-row" onclick="editSetting('source_name','Manba nomi')">
+          <span class="setting-key">Manba nomi</span>
           <span class="setting-val" id="sv-source_name">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('author','Author')">
-          <span class="setting-key">Author</span>
+        <div class="setting-row" onclick="editSetting('author','Muallif')">
+          <span class="setting-key">Muallif</span>
           <span class="setting-val" id="sv-author">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('click_btn','Click the button')">
-          <span class="setting-key">Click the button</span>
+        <div class="setting-row" onclick="editSetting('click_btn','Tugmani bosish')">
+          <span class="setting-key">Tugmani bosish</span>
           <span class="setting-val" id="sv-click_btn">none</span>
         </div>
       </div>
@@ -1077,32 +1120,32 @@ body{
     <div class="card">
       <div class="sec-header" onclick="toggleSec('mod')">
         <div class="sec-icon orange"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-        <span class="sec-title">Modification</span>
+        <span class="sec-title">O'zgartirishlar (Modification)</span>
         <div class="sec-arrow open" id="arr-mod"><i class="fa-solid fa-chevron-down"></i></div>
       </div>
       <div class="sec-body open" id="body-mod">
-        <div class="setting-row" onclick="editSetting('replacements','Replacements')">
-          <span class="setting-key">Replacements</span>
+        <div class="setting-row" onclick="editSetting('replacements','So\'zlarni almashtirish')">
+          <span class="setting-key">So'zlarni almashtirish</span>
           <span class="setting-val" id="sv-replacements">0</span>
         </div>
         <div class="setting-row" onclick="toast('GPT integratsiya tez orada!','ok')">
-          <span class="setting-key"><i class="fa-solid fa-robot" style="color:var(--warn);margin-right:6px;font-size:12px"></i>AI Processing</span>
+          <span class="setting-key"><i class="fa-solid fa-robot" style="color:var(--warn);margin-right:6px;font-size:12px"></i>AI bilan tahrirlash</span>
           <span style="font-size:11px;color:var(--warn);background:var(--warn-dim);border:1px solid rgba(255,165,2,.2);padding:2px 8px;border-radius:var(--r-sm);font-weight:600">Tez orada</span>
         </div>
-        <div class="setting-row" onclick="editSetting('trim','Trim')">
-          <span class="setting-key">Trim</span>
+        <div class="setting-row" onclick="editSetting('trim','Matnni qisqartirish')">
+          <span class="setting-key">Matnni qisqartirish</span>
           <span class="setting-val" id="sv-trim">0</span>
         </div>
-        <div class="setting-row" onclick="editSetting('header','Header')">
-          <span class="setting-key">Header</span>
+        <div class="setting-row" onclick="editSetting('header','Yuqori matn (Header)')">
+          <span class="setting-key">Yuqori matn (Header)</span>
           <span class="setting-val" id="sv-header">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('footer','Footer')">
-          <span class="setting-key">Footer</span>
+        <div class="setting-row" onclick="editSetting('footer','Quyi matn (Footer)')">
+          <span class="setting-key">Quyi matn (Footer)</span>
           <span class="setting-val" id="sv-footer">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('replace_links','Replace source links')">
-          <span class="setting-key">Replace source links</span>
+        <div class="setting-row" onclick="editSetting('replace_links','Manba havolalarini almashtirish')">
+          <span class="setting-key">Manba havolalarini almashtirish</span>
           <span class="setting-val" id="sv-replace_links">ignore</span>
         </div>
       </div>
@@ -1112,36 +1155,36 @@ body{
     <div class="card">
       <div class="sec-header" onclick="toggleSec('cnt')">
         <div class="sec-icon" style="background:rgba(255,71,87,.12);color:var(--danger)"><i class="fa-solid fa-photo-film"></i></div>
-        <span class="sec-title">Content</span>
+        <span class="sec-title">Kontent / Media</span>
         <div class="sec-arrow open" id="arr-cnt"><i class="fa-solid fa-chevron-down"></i></div>
       </div>
       <div class="sec-body open" id="body-cnt">
-        <div class="setting-row" onclick="editSetting('watermarks','Watermarks')">
-          <span class="setting-key">Watermarks</span>
+        <div class="setting-row" onclick="editSetting('watermarks','Suv belgilari (Watermarks)')">
+          <span class="setting-key">Suv belgilari (Watermarks)</span>
           <span class="setting-val" id="sv-watermarks">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('media_caption','Media caption')">
-          <span class="setting-key">Media caption</span>
+        <div class="setting-row" onclick="editSetting('media_caption','Media matni (Caption)')">
+          <span class="setting-key">Media matni (Caption)</span>
           <span class="setting-val" id="sv-media_caption">caption_name</span>
         </div>
-        <div class="setting-row" onclick="editSetting('feedback_btns','Feedback buttons')">
-          <span class="setting-key">Feedback buttons</span>
+        <div class="setting-row" onclick="editSetting('feedback_btns','Fikr-mulohaza tugmalari')">
+          <span class="setting-key">Fikr-mulohaza tugmalari</span>
           <span class="setting-val" id="sv-feedback_btns">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('copy_btns','Copy buttons')">
-          <span class="setting-key">Copy buttons</span>
+        <div class="setting-row" onclick="editSetting('copy_btns','Nusxalash tugmalari')">
+          <span class="setting-key">Nusxalash tugmalari</span>
           <span class="setting-val" id="sv-copy_btns">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('add_btns','Add buttons')">
-          <span class="setting-key">Add buttons</span>
+        <div class="setting-row" onclick="editSetting('add_btns','Tugmalar qo\'shish')">
+          <span class="setting-key">Tugmalar qo'shish</span>
           <span class="setting-val" id="sv-add_btns">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('polls','Polls')">
-          <span class="setting-key">Polls</span>
+        <div class="setting-row" onclick="editSetting('polls','So\'rovnomalar')">
+          <span class="setting-key">So'rovnomalar</span>
           <span class="setting-val" id="sv-polls">none</span>
         </div>
-        <div class="setting-row" onclick="editSetting('comments','Comments')">
-          <span class="setting-key">Comments</span>
+        <div class="setting-row" onclick="editSetting('comments','Izohlar')">
+          <span class="setting-key">Izohlar</span>
           <span class="setting-val" id="sv-comments">0</span>
         </div>
       </div>
@@ -1151,7 +1194,7 @@ body{
     <div class="card">
       <div class="sec-header" onclick="toggleSec('pub')">
         <div class="sec-icon" style="background:rgba(0,198,255,.1);color:#00c6ff"><i class="fa-solid fa-rocket"></i></div>
-        <span class="sec-title">Publishing</span>
+        <span class="sec-title">Nashr qilish (Publishing)</span>
         <div class="sec-arrow open" id="arr-pub"><i class="fa-solid fa-chevron-down"></i></div>
       </div>
       <div class="sec-body open" id="body-pub">
@@ -1159,36 +1202,36 @@ body{
           <span class="setting-key"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:6px;font-size:12px"></i>Google Drive</span>
           <div class="toggle" id="tgl-google_drive"></div>
         </div>
-        <div class="setting-row" onclick="editSetting('pub_delay','Delay')">
-          <span class="setting-key">Delay</span>
+        <div class="setting-row" onclick="editSetting('pub_delay','Kechikish (Delay)')">
+          <span class="setting-key">Kechikish (Delay)</span>
           <span class="setting-val" id="sv-pub_delay">0</span>
         </div>
-        <div class="setting-row" onclick="toggleBool('pin','Pin')">
-          <span class="setting-key">Pin</span>
+        <div class="setting-row" onclick="toggleBool('pin','Qadab qo\'yish (Pin)')">
+          <span class="setting-key">Qadab qo'yish (Pin)</span>
           <div class="toggle" id="tgl-pin"></div>
         </div>
-        <div class="setting-row" onclick="toggleBool('silent','Silent mode')">
-          <span class="setting-key">Silent mode</span>
+        <div class="setting-row" onclick="toggleBool('silent','Sessiz rejim')">
+          <span class="setting-key">Sessiz rejim</span>
           <div class="toggle" id="tgl-silent"></div>
         </div>
-        <div class="setting-row" onclick="editSetting('preview','Preview')">
-          <span class="setting-key">Preview</span>
+        <div class="setting-row" onclick="editSetting('preview','Oldindan ko\'rish (Preview)')">
+          <span class="setting-key">Oldindan ko'rish (Preview)</span>
           <span class="setting-val" id="sv-preview">pass</span>
         </div>
-        <div class="setting-row" onclick="editSetting('delivery_rate','Delivery rate')">
-          <span class="setting-key">Delivery rate</span>
+        <div class="setting-row" onclick="editSetting('delivery_rate','Yetkazib berish tezligi')">
+          <span class="setting-key">Yetkazib berish tezligi</span>
           <span class="setting-val" id="sv-delivery_rate">0</span>
         </div>
-        <div class="setting-row" onclick="editSetting('schedule','Schedule')">
-          <span class="setting-key"><i class="fa-solid fa-calendar" style="color:var(--muted);margin-right:6px;font-size:12px"></i>Schedule</span>
+        <div class="setting-row" onclick="editSetting('schedule','Rejalashtirish (Schedule)')">
+          <span class="setting-key"><i class="fa-solid fa-calendar" style="color:var(--muted);margin-right:6px;font-size:12px"></i>Rejalashtirish (Schedule)</span>
           <span class="setting-val" id="sv-schedule">0</span>
         </div>
-        <div class="setting-row" onclick="editSetting('flood_behavior','Flood behavior')">
-          <span class="setting-key">Flood behavior</span>
+        <div class="setting-row" onclick="editSetting('flood_behavior','Flood holati')">
+          <span class="setting-key">Flood holati</span>
           <span class="setting-val" id="sv-flood_behavior">reschedule...</span>
         </div>
-        <div class="setting-row" onclick="editSetting('moderation','Moderation')">
-          <span class="setting-key">Moderation</span>
+        <div class="setting-row" onclick="editSetting('moderation','Moderatsiya')">
+          <span class="setting-key">Moderatsiya</span>
           <span class="setting-val" id="sv-moderation">Off</span>
         </div>
       </div>
@@ -1206,7 +1249,7 @@ body{
 <div class="screen" id="s-filters">
   <div class="hdr">
     <button class="hdr-back" onclick="go('s-rsettings')"><i class="fa-solid fa-chevron-left" style="font-size:12px"></i></button>
-    <div class="hdr-title"><i class="fa-solid fa-filter" style="color:var(--accent);margin-right:6px;font-size:13px"></i>Filters</div>
+    <div class="hdr-title"><i class="fa-solid fa-filter" style="color:var(--accent);margin-right:6px;font-size:13px"></i>Filtrlar</div>
     <button class="hdr-btn" onclick="toggleFilterInfo()"><i class="fa-solid fa-circle-info"></i></button>
   </div>
   <div class="content" style="padding-bottom:80px">
@@ -1232,7 +1275,7 @@ body{
   <div class="filter-toolbar">
     <div id="ftype-display" class="filter-type-sel" onclick="toggleFTypeDrop()">
       <span id="ftype-icon">🎯</span>
-      <span id="ftype-label" style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Exact text filter</span>
+      <span id="ftype-label" style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Aniq matn filtri</span>
       <i class="fa-solid fa-chevron-down" style="color:var(--muted);font-size:10px;flex-shrink:0"></i>
     </div>
     <button class="ftb-btn" onclick="addFilter()" title="Qo'shish"><i class="fa-solid fa-plus"></i></button>
@@ -1247,7 +1290,7 @@ body{
 <div class="screen" id="s-rules">
   <div class="hdr">
     <button class="hdr-back" onclick="go('s-home')"><i class="fa-solid fa-chevron-left" style="font-size:12px"></i></button>
-    <div class="hdr-title"><i class="fa-solid fa-list-check" style="color:var(--accent);margin-right:6px;font-size:13px"></i>My Rules</div>
+    <div class="hdr-title"><i class="fa-solid fa-list-check" style="color:var(--accent);margin-right:6px;font-size:13px"></i>Mening qoidalarim</div>
     <button class="hdr-menu" onclick="openMenu()"><i class="fa-solid fa-bars" style="font-size:12px"></i></button>
   </div>
   <div class="content pb80" id="rules-list">
@@ -1258,22 +1301,6 @@ body{
     </div>
   </div>
   <button class="fab" onclick="startFw()"><i class="fa-solid fa-plus"></i></button>
-</div>
-
-<!-- BUNDLE MODAL -->
-<div class="modal-bg" id="m-bundle">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div style="float:right;cursor:pointer;color:var(--muted);width:28px;height:28px;background:var(--surface2);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:12px" onclick="closeModal('m-bundle')"><i class="fa-solid fa-xmark"></i></div>
-    <div class="modal-title"><i class="fa-solid fa-tag" style="color:var(--accent);margin-right:8px"></i>Tarif tanlang</div>
-    <div class="modal-sub">Turli tariflar turli manba turlari bilan ishlash imkonini beradi.<br><br><b style="color:var(--text)">Expert</b> — istalgan manbalar, tezkor yetkazish.<br><b style="color:var(--text)">Express</b> — faqat ochiq manbalarda yangi xabarlar.</div>
-    <button class="btn btn-p" onclick="doExpert()" style="margin-bottom:10px">
-      <i class="fa-solid fa-crown"></i> Expert demosini olish
-    </button>
-    <button class="btn btn-o" onclick="doExpress()">
-      <i class="fa-solid fa-bolt"></i> Express demosini olish
-    </button>
-  </div>
 </div>
 
 <!-- EDIT SETTING MODAL -->
@@ -1308,7 +1335,227 @@ body{
   </div>
 </div>
 
+<!-- INFO MODALS -->
+<div class="modal-bg" id="m-why">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><i class="fa-solid fa-lock" style="color:var(--accent);margin-right:8px"></i>Nima uchun ulash kerak?</div>
+    <div class="modal-sub" style="text-align: left;">
+      <p style="margin-bottom: 12px; font-size: 14px; color: var(--text);">Avto Pass bot xabarlarni yopiq kanal va guruhlardan o'qiy olishi uchun sizning Telegram akkauntingiz orqali ulanishi zarur.</p>
+      <p style="margin-bottom: 8px; font-size: 14px; color: var(--text);"><b>Bu xavfsizmi?</b></p>
+      <p style="font-size: 13px; color: var(--text2);">Ha, to'liq xavfsiz! Tizim rasmiy Telegram API (Telethon) yordamida ulanadi va ma'lumotlaringiz hech qayerda saqlanmaydi. U faqatgina siz o'rnatgan qoidalar bo'yicha belgilangan chatlardan kelgan xabarlarni kerakli manzilga yo'naltiradi, xolos.</p>
+    </div>
+    <button class="btn btn-p" onclick="closeModal('m-why')" style="margin-top:20px">Tushunarli</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="m-about">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><i class="fa-solid fa-users" style="color:var(--success);margin-right:8px"></i>Biz haqimizda</div>
+    <div class="modal-sub" style="text-align: left;">
+      <p style="margin-bottom: 12px; font-size: 14px; color: var(--text);"><b>Avto Pass bot</b> - bu Telegram'da kanallar, guruhlar va shaxsiy chatlardagi xabarlarni oson boshqarish hamda avtomatlashtirish uchun mo'ljallangan professional vosita.</p>
+      <p style="font-size: 13px; color: var(--text2);">Bizning maqsadimiz mijozlar vaqtini tejash, e'lonlarni tezkor qayta ishlash hamda bizneslarni Telegram orqali yuritishda to'liq qulaylik va yuqori ishonchlilikni ta'minlashdir.</p>
+    </div>
+    <button class="btn btn-p" onclick="closeModal('m-about')" style="margin-top:20px">Yopish</button>
+  </div>
+</div>
+
 <div class="toast" id="tst"></div>
+
+
+<!-- SUB PAYWALL -->
+<div class="screen" id="s-sub">
+  <div class="hdr">
+    <div class="hdr-title" style="text-align:center">Obuna muddati tugagan</div>
+  </div>
+  <div class="content" style="padding: 20px 16px">
+    <div style="text-align:center; margin-bottom:24px">
+      <div style="font-size:48px; margin-bottom:12px">🔒</div>
+      <h2 style="font-size:18px; margin-bottom:8px">Botdan foydalanish uchun obuna sotib oling</h2>
+      <p style="font-size:13px; color:var(--muted)">Sizning obuna muddatlaringiz tugagan yoki hali sotib olinmagan.</p>
+    </div>
+    
+    <div class="sub-plan-card sel" onclick="selectMonths(1)" id="plan-1">
+      <div style="font-size:14px; font-weight:600; color:var(--accent)">1 Oylik obuna</div>
+      <div class="sub-price" id="subPriceDisplay">15,000 so'm</div>
+    </div>
+    
+    <div class="sub-plan-card" onclick="selectMonths(3)" id="plan-3">
+      <div style="font-size:14px; font-weight:600; color:var(--success)">3 Oylik obuna</div>
+      <div class="sub-price" id="subPriceDisplay3">45,000 so'm</div>
+    </div>
+
+    <button class="btn btn-p" onclick="requestSub()" id="btn-req-sub">Obuna bo'lish <i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+</div>
+
+<!-- PAYMENT PROCESS -->
+<div class="screen" id="s-pay">
+  <div class="hdr">
+    <div class="hdr-title" style="text-align:center">To'lov qilish</div>
+  </div>
+  <div class="content" style="padding: 20px 16px">
+    <div style="background:var(--surface2); border:1px solid var(--border); border-radius:var(--r-lg); padding:20px; text-align:center; margin-bottom:20px">
+      <div style="font-size:13px; color:var(--muted); margin-bottom:8px">To'lanishi kerak bo'lgan summa:</div>
+      <div style="font-size:32px; font-weight:800; color:var(--success); letter-spacing:1px" id="pay-amount-display">0 so'm</div>
+      <div style="font-size:12px; color:var(--warn); margin-top:8px; font-weight:600"><i class="fa-solid fa-triangle-exclamation"></i> Summani aniq kiritganingizga ishonch hosil qiling! Bot avtomatik tekshiradi.</div>
+    </div>
+    
+    <div style="background:var(--surface2); border:1px solid var(--border); border-radius:var(--r-lg); padding:16px; margin-bottom:20px">
+      <div style="font-size:13px; color:var(--muted); margin-bottom:12px">Quyidagi kartaga to'lov qiling:</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+        <strong style="font-size:18px; letter-spacing:2px" id="pay-card-num">8600 0000 0000 0000</strong>
+        <i class="fa-solid fa-copy" style="color:var(--accent); cursor:pointer" onclick="navigator.clipboard.writeText(document.getElementById('pay-card-num').textContent); toast('Karta nusxalandi')"></i>
+      </div>
+      <div style="font-size:13px; color:var(--text2)" id="pay-card-owner">Admin</div>
+    </div>
+    
+    <button class="btn btn-p" onclick="toast('Bot to\'lovni avtomatik tekshirmoqda. Iltimos kuting...','ok'); setTimeout(()=>go('s-home'), 3000)">
+      <i class="fa-solid fa-check-circle"></i> To'lov qildim
+    </button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="screen" id="s-admin">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-home')"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="hdr-title">Admin Panel</div>
+  </div>
+  <div class="admin-tab-bar">
+    <div class="admin-tab act" onclick="switchAdminTab('stats')" id="tab-stats">
+      <div class="icon-box" style="color:var(--accent); background:var(--accent-dim)"><i class="fa-solid fa-chart-simple"></i></div>
+      <span>Statistika</span>
+    </div>
+    <div class="admin-tab" onclick="switchAdminTab('users')" id="tab-users">
+      <div class="icon-box" style="color:var(--success); background:var(--success-dim)"><i class="fa-solid fa-users"></i></div>
+      <span>Foydalanuvchi</span>
+    </div>
+    <div class="admin-tab" onclick="switchAdminTab('payments')" id="tab-payments">
+      <div class="icon-box" style="color:var(--warn); background:var(--warn-dim)"><i class="fa-solid fa-check"></i></div>
+      <span>To'lovlar</span>
+    </div>
+    <div class="admin-tab" onclick="switchAdminTab('settings')" id="tab-settings">
+      <div class="icon-box" style="color:#b464ff; background:rgba(180,100,255,.15)"><i class="fa-solid fa-gear"></i></div>
+      <span>Sozlamalar</span>
+    </div>
+  </div>
+  <div class="content">
+    <div class="admin-panel-content act" id="pnl-stats">
+      <div style="display:flex; flex-wrap:wrap; gap:10px">
+        <div class="stat-box"><span class="stat-lbl">Jami foydalanuvchilar</span><span class="stat-val" id="st-total">0</span></div>
+        <div class="stat-box"><span class="stat-lbl">Aktiv obunalar</span><span class="stat-val" style="color:var(--success)" id="st-active">0</span></div>
+        <div class="stat-box"><span class="stat-lbl">Muddati tugagan</span><span class="stat-val" style="color:var(--danger)" id="st-exp">0</span></div>
+        <div class="stat-box"><span class="stat-lbl">Oylik daromad</span><span class="stat-val" style="color:var(--accent)" id="st-rev">0 UZS</span></div>
+      </div>
+    </div>
+    <div class="admin-panel-content" id="pnl-users">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; padding: 0 4px">
+        <strong style="font-size:16px; font-weight:800; letter-spacing:-0.02em">Foydalanuvchilar</strong>
+        <span style="color:var(--accent); font-weight:700; font-size:13px" id="admin-users-count">0 ta</span>
+      </div>
+      <input type="text" id="admin-user-search" onkeyup="filterAdminUsers()" class="inp" placeholder="Ism, ID yoki username bo'yicha izlash..." style="margin-bottom:16px; font-size:14px">
+      <div id="admin-users-list"></div>
+    </div>
+    <div class="admin-panel-content" id="pnl-payments">
+      <div id="admin-pay-list"></div>
+    </div>
+    <div class="admin-panel-content" id="pnl-settings">
+      <div class="card" style="margin:0">
+        <div style="padding:16px">
+          <label style="font-size:12px; color:var(--muted); margin-bottom:6px; display:block">Yangi Parol</label>
+          <input type="password" class="inp" id="adm-set-pass" placeholder="Parol...">
+          <label style="font-size:12px; color:var(--muted); margin:12px 0 6px; display:block">Kanal ID (CardXabar)</label>
+          <input type="text" class="inp" id="adm-set-channel" placeholder="-100...">
+          <label style="font-size:12px; color:var(--muted); margin:12px 0 6px; display:block">Oylik obuna narxi</label>
+          <input type="number" class="inp" id="adm-set-price" placeholder="15000">
+          <label style="font-size:12px; color:var(--muted); margin:12px 0 6px; display:block">💳 Karta raqami</label>
+          <input type="text" class="inp" id="adm-set-card" placeholder="8600 0000 0000 0000">
+          <label style="font-size:12px; color:var(--muted); margin:12px 0 6px; display:block">Karta egasi</label>
+          <input type="text" class="inp" id="adm-set-card-owner" placeholder="Admin">
+          <label style="font-size:12px; color:var(--muted); margin:12px 0 6px; display:block">Telegram Community havolasi</label>
+          <input type="text" class="inp" id="adm-set-community" placeholder="https://t.me/...">
+          <button class="btn btn-p" style="margin-top:16px" onclick="saveAdminSettings()">Saqlash</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-bg" id="m-admin-login">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Admin Panelga kirish</div>
+    <div class="modal-sub">Iltimos, parolni kiriting</div>
+    <input type="password" class="inp" id="inp-admin-pass" placeholder="Parol...">
+    <button class="btn btn-p" style="margin-top:16px" onclick="loginAdmin()">Kirish</button>
+  </div>
+</div>
+
+<!-- PROFILE SCREEN -->
+<div class="screen" id="s-profile">
+  <div class="hdr">
+    <button class="hdr-back" onclick="go('s-home')"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="hdr-title">Profil</div>
+  </div>
+  <div class="content" style="padding:16px">
+    <!-- User Info -->
+    <div style="text-align:center; margin-bottom:20px">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#9b59b6,#5b8fff);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 12px" id="prof-avatar">?</div>
+      <div style="font-size:18px;font-weight:700" id="prof-name">Foydalanuvchi</div>
+      <div style="font-size:13px;color:var(--muted)" id="prof-uid"></div>
+    </div>
+
+    <!-- Subscription Status -->
+    <div class="card" style="margin:0 0 14px">
+      <div style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span style="font-size:13px;color:var(--muted)">Obuna holati</span>
+          <span style="font-size:13px;font-weight:700;padding:4px 10px;border-radius:var(--r-pill)" id="prof-status-badge">—</span>
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:4px" id="prof-expires-label">Muddati:</div>
+        <div style="font-size:15px;font-weight:600" id="prof-expires-val">—</div>
+        <div style="font-size:12px;color:var(--warn);margin-top:8px;display:none" id="prof-trial-msg">
+          <i class="fa-solid fa-clock"></i> Sinov muddati — 7 kun bepul!
+        </div>
+      </div>
+    </div>
+
+    <!-- Buy Subscription -->
+    <div class="card" style="margin:0 0 14px">
+      <div style="padding:16px">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px"><i class="fa-solid fa-crown" style="color:var(--warn);margin-right:6px"></i>Obuna sotib olish</div>
+        
+        <div class="sub-plan-card sel" onclick="selectProfileMonths(1)" id="prof-plan-1">
+          <div style="font-size:14px;font-weight:600;color:var(--accent)">1 Oylik</div>
+          <div class="sub-price" id="prof-price-1">15,000 so'm</div>
+        </div>
+        
+        <div class="sub-plan-card" onclick="selectProfileMonths(3)" id="prof-plan-3">
+          <div style="font-size:14px;font-weight:600;color:var(--success)">3 Oylik</div>
+          <div class="sub-price" id="prof-price-3">45,000 so'm</div>
+        </div>
+        
+        <div class="sub-plan-card" onclick="selectProfileMonths(6)" id="prof-plan-6">
+          <div style="font-size:14px;font-weight:600;color:#e67e22">6 Oylik</div>
+          <div class="sub-price" id="prof-price-6">90,000 so'm</div>
+        </div>
+        
+        <div class="sub-plan-card" onclick="selectProfileMonths(12)" id="prof-plan-12">
+          <div style="font-size:14px;font-weight:600;color:var(--warn)">12 Oylik <span style="font-size:11px;background:var(--warn-dim);padding:2px 6px;border-radius:var(--r-pill);margin-left:4px">Tejamkor</span></div>
+          <div class="sub-price" id="prof-price-12">180,000 so'm</div>
+        </div>
+        
+        <button class="btn btn-p" onclick="requestProfileSub()" id="btn-prof-sub">
+          <i class="fa-solid fa-cart-shopping"></i> Obuna sotib olish
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- MENU PANEL -->
 <div class="modal-bg" id="m-menu">
@@ -1318,9 +1565,20 @@ body{
       <i class="fa-solid fa-bolt" style="color:var(--accent);margin-right:8px;font-size:15px"></i>ForwardBot
     </div>
     <div class="card" style="margin:0 0 10px">
+      <div class="card-row" onclick="closeModal('m-menu'); openModal('m-admin-login')">
+        <div style="width:34px;height:34px;border-radius:var(--r-sm);background:rgba(255,165,2,.15);display:flex;align-items:center;justify-content:center;color:var(--warn);font-size:13px;flex-shrink:0"><i class="fa-solid fa-lock"></i></div>
+        <div style="flex:1"><strong style="font-size:14px">Admin Panel</strong></div>
+        <span class="chev"><i class="fa-solid fa-chevron-right" style="font-size:9px"></i></span>
+      </div>
+
       <div class="card-row" onclick="closeModal('m-menu');go('s-home')">
         <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:13px;flex-shrink:0"><i class="fa-solid fa-house"></i></div>
         <div style="flex:1"><strong style="font-size:14px">Bosh sahifa</strong></div>
+        <span class="chev"><i class="fa-solid fa-chevron-right" style="font-size:9px"></i></span>
+      </div>
+      <div class="card-row" onclick="closeModal('m-menu');go('s-profile')">
+        <div style="width:34px;height:34px;border-radius:var(--r-sm);background:rgba(155,89,182,.15);display:flex;align-items:center;justify-content:center;color:#9b59b6;font-size:13px;flex-shrink:0"><i class="fa-solid fa-user"></i></div>
+        <div style="flex:1"><strong style="font-size:14px">Profil</strong></div>
         <span class="chev"><i class="fa-solid fa-chevron-right" style="font-size:9px"></i></span>
       </div>
       <div class="card-row" onclick="closeModal('m-menu');go('s-rules')">
@@ -1345,7 +1603,7 @@ body{
 // ═══════════════════════════════
 // CONFIG
 // ═══════════════════════════════
-const API = 'http://localhost:8000';
+const API = 'https://forwardbot-production-1f08.up.railway.app';
 let UID = 'demo_user';
 if(window.Telegram?.WebApp){
   window.Telegram.WebApp.ready();
@@ -1353,6 +1611,379 @@ if(window.Telegram?.WebApp){
   const u = window.Telegram.WebApp.initDataUnsafe?.user;
   if(u) UID = String(u.id);
 }
+
+
+// ═══════════════════════════════
+// SUB & ADMIN LOGIC
+// ═══════════════════════════════
+let subPrice = 15000;
+let selMonths = 1;
+let adminPass = '';
+
+async function loadBackendRules() {
+  if(UID === 'demo_user') return;
+  try {
+    const r = await fetch(`${API}/rules/${UID}`);
+    const d = await r.json();
+    rules = d.rules || [];
+    localStorage.setItem('fb_rules', JSON.stringify(rules));
+  } catch(e){}
+}
+
+async function checkSubStatus(){
+  if(UID === 'demo_user') return;
+  await loadBackendRules();
+  try {
+    const r = await fetch(`${API}/sub/status/${UID}`);
+    const d = await r.json();
+    window._subData = d;
+    subPrice = d.price || 15000;
+    if(document.getElementById('subPriceDisplay')) document.getElementById('subPriceDisplay').textContent = subPrice.toLocaleString('uz-UZ') + " so'm";
+    if(document.getElementById('subPriceDisplay3')) document.getElementById('subPriceDisplay3').textContent = (subPrice * 3).toLocaleString('uz-UZ') + " so'm";
+    if(d.card_number) {
+      const cn = document.getElementById('pay-card-num');
+      const co = document.getElementById('pay-card-owner');
+      if(cn) cn.textContent = d.card_number;
+      if(co) co.textContent = d.card_owner || 'Admin';
+    }
+    if(!d.active) {
+      go('s-sub');
+    }
+  } catch(e){}
+}
+
+function selectMonths(m) {
+  selMonths = m;
+  document.getElementById('plan-1').classList.remove('sel');
+  document.getElementById('plan-3').classList.remove('sel');
+  document.getElementById(`plan-${m}`).classList.add('sel');
+}
+
+async function requestSub(){
+  const btn = document.getElementById('btn-req-sub');
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kuting...';
+  try {
+    const r = await fetch(`${API}/sub/request`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        user_id: String(UID), months: selMonths,
+        phone: document.getElementById('home-conn')?.textContent || '',
+        name: window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || '',
+        username: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || ''
+      })
+    });
+    const d = await r.json();
+    if(d.ok) {
+      document.getElementById('pay-amount-display').textContent = d.amount.toLocaleString('uz-UZ') + " so'm";
+      if(d.card_number) {
+        const cn = document.getElementById('pay-card-num');
+        const co = document.getElementById('pay-card-owner');
+        if(cn) cn.textContent = d.card_number;
+        if(co) co.textContent = d.card_owner || 'Admin';
+      }
+      go('s-pay');
+    } else {
+      toast("Xatolik", "err");
+    }
+  } catch(e){ toast("Xatolik", "err"); }
+  btn.disabled = false; btn.innerHTML = 'Obuna bo\'lish <i class="fa-solid fa-arrow-right"></i>';
+}
+
+async function loginAdmin(){
+  const p = document.getElementById('inp-admin-pass').value;
+  try {
+    const r = await fetch(`${API}/admin/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:p})
+    });
+    const d = await r.json();
+    if(d.ok) {
+      adminPass = p;
+      closeModal('m-admin-login');
+      document.getElementById('inp-admin-pass').value = '';
+      loadAdminStats();
+      go('s-admin');
+    } else { toast("Parol noto'g'ri", "err"); }
+  } catch(e) { toast("Xatolik", "err"); }
+}
+
+function switchAdminTab(t) {
+  ['stats','users','payments','settings'].forEach(x => {
+    document.getElementById(`tab-${x}`).classList.remove('act');
+    document.getElementById(`pnl-${x}`).classList.remove('act');
+  });
+  document.getElementById(`tab-${t}`).classList.add('act');
+  document.getElementById(`pnl-${t}`).classList.add('act');
+  if(t==='stats') loadAdminStats();
+  if(t==='users') loadAdminUsers();
+  if(t==='payments') loadAdminPayments();
+  if(t==='settings') loadAdminSettings();
+}
+
+async function loadAdminStats(){
+  try {
+    const r = await fetch(`${API}/admin/stats?password=${adminPass}`);
+    const d = await r.json();
+    document.getElementById('st-total').textContent = d.total_users;
+    document.getElementById('st-active').textContent = d.active_subs;
+    document.getElementById('st-exp').textContent = d.expired_subs;
+    document.getElementById('st-rev').textContent = d.monthly_revenue.toLocaleString('uz-UZ') + " UZS";
+  } catch(e){}
+}
+
+let adminAllUsers = [];
+
+async function loadAdminUsers(){
+  try {
+    const r = await fetch(`${API}/admin/users?password=${adminPass}`);
+    const d = await r.json();
+    adminAllUsers = Object.entries(d).reverse();
+    renderAdminUsers(adminAllUsers);
+  } catch(e){}
+}
+
+function renderAdminUsers(usersArr) {
+    const el = document.getElementById('admin-users-list');
+    const now = Date.now() / 1000;
+    document.getElementById('admin-users-count').innerText = `${usersArr.length} ta`;
+    
+    if (usersArr.length === 0) {
+        el.innerHTML = '<div style="text-align:center; padding:20px; color:var(--muted)">Hech kim topilmadi</div>';
+        return;
+    }
+    
+    el.innerHTML = usersArr.map(([uid, u]) => {
+      const active = (u.expires_at || 0) > now;
+      const statusBadge = active 
+        ? `<div style="background:var(--success-dim); border:1px solid rgba(46,213,115,.2); color:var(--success); font-size:11px; padding:5px 12px; border-radius:var(--r-pill); font-weight:700">Aktiv obuna</div>`
+        : `<div style="background:var(--surface3); border:1px solid var(--border); color:var(--text2); font-size:11px; padding:5px 12px; border-radius:var(--r-pill); font-weight:700">Obuna yo'q</div>`;
+      
+      const avColor = active ? 'var(--accent)' : 'var(--text2)';
+      const avInitial = (u.name || 'U').charAt(0).toUpperCase();
+      const phoneText = u.phone ? u.phone : 'Raqam kiritilmagan';
+      const phoneColor = u.phone ? 'var(--text2)' : 'var(--danger)';
+      const phoneIcon = u.phone ? 'fa-phone' : 'fa-phone-slash';
+      
+      let expText = "";
+      if (u.expires_at) {
+          const d = new Date(u.expires_at * 1000);
+          const dStr = ("0" + d.getDate()).slice(-2) + "." + ("0" + (d.getMonth() + 1)).slice(-2) + "." + d.getFullYear();
+          const tStr = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+          expText = `<div style="font-size:11px; color:var(--muted); display:flex; align-items:center; gap:6px"><i class="fa-regular fa-clock"></i> ${dStr} ${tStr} gacha</div>`;
+      }
+      
+      return `
+      <div class="user-row" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:16px; margin-bottom:12px; display:flex; flex-direction:column; gap:14px; box-shadow:0 4px 16px rgba(0,0,0,.2)">
+        <div style="display:flex; align-items:center; gap:12px">
+          <div style="width:48px; height:48px; border-radius:14px; background:var(--surface2); color:${avColor}; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; flex-shrink:0; border:1px solid var(--border)">
+            ${avInitial}
+          </div>
+          <div style="flex:1; min-width:0">
+            <strong style="font-size:15px; font-weight:700; display:block; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">${u.name || 'Ismsiz foydalanuvchi'}</strong>
+            <span style="font-size:13px; color:var(--accent); font-weight:500">@${u.username || uid}</span>
+          </div>
+          <button onclick="if('${u.username || ''}') { window.Telegram.WebApp.openTelegramLink('https://t.me/${u.username}'); } else { window.location.href = 'tg://user?id=${uid}'; }" style="width:38px; height:38px; border-radius:10px; background:var(--surface2); color:var(--accent); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; flex-shrink:0; transition:all .2s">
+            <i class="fa-brands fa-telegram"></i>
+          </button>
+        </div>
+        <div style="height:1px; background:var(--border); margin:0 -16px"></div>
+        <div style="display:flex; align-items:center; justify-content:space-between">
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <div style="font-size:12px; color:${phoneColor}; display:flex; align-items:center; gap:6px; font-weight:500">
+              <i class="fa-solid ${phoneIcon}" style="opacity:0.8; font-size:11px"></i> ${phoneText}
+            </div>
+            <div style="font-size:11px; color:var(--muted); display:flex; align-items:center; gap:6px; font-weight:500">
+              <i class="fa-solid fa-id-card" style="opacity:0.8; font-size:11px"></i> ID: ${uid}
+            </div>
+            ${expText}
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px">
+            ${statusBadge}
+            <button onclick="openAddSubModal('${uid}', '${(u.name || 'Ismsiz').replace(/'/g, "\\'")}')" style="background:rgba(46,213,115,.15); color:var(--success); border:1px solid rgba(46,213,115,.3); border-radius:8px; padding:6px 10px; font-size:11px; font-weight:700; display:flex; align-items:center; gap:6px; cursor:pointer"><i class="fa-solid fa-plus"></i> Obuna qo'shish</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function filterAdminUsers() {
+    const q = document.getElementById('admin-user-search').value.toLowerCase();
+    if (!q) return renderAdminUsers(adminAllUsers);
+    const filtered = adminAllUsers.filter(([uid, u]) => {
+        const name = (u.name || '').toLowerCase();
+        const uname = (u.username || '').toLowerCase();
+        return name.includes(q) || uname.includes(q) || String(uid).includes(q);
+    });
+    renderAdminUsers(filtered);
+}
+
+function openAddSubModal(uid, name) {
+    try {
+        document.getElementById('add-sub-uid').value = uid;
+        document.getElementById('add-sub-username').innerText = `Foydalanuvchi: ${name} (${uid})`;
+        document.getElementById('mod-add-sub').style.display = 'flex';
+    } catch(e) {
+        toast("Oyna ochishda xatolik: " + e.message, "err");
+    }
+}
+
+async function submitAddSub() {
+    const uid = document.getElementById('add-sub-uid').value;
+    const radios = document.getElementsByName('add_sub_months');
+    let months = 1;
+    for (let r of radios) { if (r.checked) months = parseInt(r.value); }
+    
+    try {
+        const res = await fetch(`${API}/admin/users/add_sub?uid=${uid}&months=${months}&password=${encodeURIComponent(adminPass)}`, {method:'POST'});
+        const data = await res.json();
+        if (data.ok) {
+            toast("Obuna qo'shildi!", "ok");
+            document.getElementById('mod-add-sub').style.display = 'none';
+            loadAdminUsers();
+        } else { toast("Xatolik: " + (data.detail || "Server xatosi"), "err"); }
+    } catch(e) { toast("Xatolik: " + e.message, "err"); }
+}
+
+async function loadAdminPayments(){
+  try {
+    const r = await fetch(`${API}/admin/payments?password=${adminPass}`);
+    const d = await r.json();
+    const el = document.getElementById('admin-pay-list');
+    el.innerHTML = Object.entries(d).map(([suffix, p]) => `
+      <div class="pay-box">
+        <strong>Summa: ${p.amount.toLocaleString('uz-UZ')} so'm</strong>
+        <span>Foydalanuvchi: ${p.name} (${p.user_id})</span>
+        <span>Muddati: ${p.months} oy</span>
+        <div style="display:flex; gap:8px; margin-top:10px">
+          <button class="btn btn-p" style="padding:8px" onclick="approvePay('${suffix}')">Tasdiqlash</button>
+          <button class="btn btn-o" style="padding:8px; color:var(--danger)" onclick="rejectPay('${suffix}')">Rad etish</button>
+        </div>
+      </div>
+    `).join('');
+    if(Object.keys(d).length === 0) el.innerHTML = '<div style="text-align:center; color:var(--muted); padding:20px">Kutilayotgan to\'lovlar yo\'q</div>';
+  } catch(e){}
+}
+
+async function approvePay(suffix){
+  try {
+    await fetch(`${API}/admin/payments/approve?suffix=${suffix}&password=${adminPass}`, {method:'POST'});
+    toast("Tasdiqlandi!", "ok"); loadAdminPayments();
+  } catch(e){}
+}
+async function rejectPay(suffix){
+  try {
+    await fetch(`${API}/admin/payments/reject?suffix=${suffix}&password=${adminPass}`, {method:'POST'});
+    toast("Rad etildi!", "ok"); loadAdminPayments();
+  } catch(e){}
+}
+
+async function loadAdminSettings(){
+  try {
+    const r = await fetch(`${API}/admin/settings?password=${adminPass}`);
+    const d = await r.json();
+    document.getElementById('adm-set-pass').value = d.password;
+    document.getElementById('adm-set-channel').value = d.channel_id;
+    document.getElementById('adm-set-price').value = d.monthly_price;
+    document.getElementById('adm-set-card').value = d.card_number || '';
+    document.getElementById('adm-set-card-owner').value = d.card_owner || '';
+    document.getElementById('adm-set-community').value = d.community_link || '';
+  } catch(e){}
+}
+
+async function saveAdminSettings(){
+  try {
+    await fetch(`${API}/admin/settings?password=${adminPass}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        password: document.getElementById('adm-set-pass').value,
+        channel_id: document.getElementById('adm-set-channel').value,
+        monthly_price: parseInt(document.getElementById('adm-set-price').value) || 15000,
+        card_number: document.getElementById('adm-set-card').value || '8600 0000 0000 0000',
+        card_owner: document.getElementById('adm-set-card-owner').value || 'Admin',
+        community_link: document.getElementById('adm-set-community').value
+      })
+    });
+    toast("Saqlandi!", "ok");
+    adminPass = document.getElementById('adm-set-pass').value;
+    window.COMMUNITY_LINK = document.getElementById('adm-set-community').value;
+  } catch(e){}
+}
+
+// ═══════════════════════════════
+// PROFILE FUNCTIONS
+// ═══════════════════════════════
+let profSelMonths = 1;
+
+function loadProfile() {
+  const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  if(u) {
+    const name = [u.first_name, u.last_name].filter(Boolean).join(' ');
+    document.getElementById('prof-name').textContent = name || 'Foydalanuvchi';
+    document.getElementById('prof-avatar').textContent = (name || '?')[0].toUpperCase();
+    document.getElementById('prof-uid').textContent = 'ID: ' + u.id;
+  }
+  const d = window._subData;
+  if(d) {
+    const badge = document.getElementById('prof-status-badge');
+    const exVal = document.getElementById('prof-expires-val');
+    const trialMsg = document.getElementById('prof-trial-msg');
+    if(d.active) {
+      badge.textContent = d.trial ? '🎁 Sinov' : '✅ Aktiv';
+      badge.style.background = d.trial ? 'var(--warn-dim)' : 'var(--success-dim)';
+      badge.style.color = d.trial ? 'var(--warn)' : 'var(--success)';
+      if(d.trial) trialMsg.style.display = 'block';
+      const expDate = new Date(d.expires_at * 1000);
+      exVal.textContent = expDate.toLocaleDateString('uz-UZ', {day:'2-digit', month:'long', year:'numeric'});
+    } else {
+      badge.textContent = '❌ Muddati tugagan';
+      badge.style.background = 'var(--danger-dim)';
+      badge.style.color = 'var(--danger)';
+      exVal.textContent = 'Obuna sotib oling';
+    }
+    // Update prices
+    const p = d.price || 15000;
+    document.getElementById('prof-price-1').textContent = p.toLocaleString('uz-UZ') + " so'm";
+    document.getElementById('prof-price-3').textContent = (p*3).toLocaleString('uz-UZ') + " so'm";
+    document.getElementById('prof-price-6').textContent = (p*6).toLocaleString('uz-UZ') + " so'm";
+    document.getElementById('prof-price-12').textContent = (p*12).toLocaleString('uz-UZ') + " so'm";
+  }
+}
+
+function selectProfileMonths(m) {
+  profSelMonths = m;
+  [1,3,6,12].forEach(x => {
+    const el = document.getElementById(`prof-plan-${x}`);
+    if(el) el.classList.toggle('sel', x === m);
+  });
+}
+
+async function requestProfileSub() {
+  const btn = document.getElementById('btn-prof-sub');
+  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kuting...';
+  try {
+    const r = await fetch(`${API}/sub/request`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user_id: String(UID), months: profSelMonths,
+        phone: '',
+        name: window.Telegram?.WebApp?.initDataUnsafe?.user?.first_name || '',
+        username: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || ''
+      })
+    });
+    const d = await r.json();
+    if(d.ok) {
+      document.getElementById('pay-amount-display').textContent = d.amount.toLocaleString('uz-UZ') + " so'm";
+      if(d.card_number) {
+        const cn = document.getElementById('pay-card-num');
+        const co = document.getElementById('pay-card-owner');
+        if(cn) cn.textContent = d.card_number;
+        if(co) co.textContent = d.card_owner || 'Admin';
+      }
+      go('s-pay');
+    } else { toast('Xatolik','err'); }
+  } catch(e){ toast('Xatolik','err'); }
+  btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> Obuna sotib olish';
+}
+
 
 // ═══════════════════════════════
 // STATE
@@ -1366,7 +1997,7 @@ let rules = JSON.parse(localStorage.getItem('fb_rules')||'[]');
 let currentRuleIdx = -1;
 let ruleSettings = {};
 let activeFilters = [];
-let selectedFilterType = {icon:'🎯',label:'Exact text filter',val:'exact'};
+let selectedFilterType = {icon:'🎯',label:'Aniq matn filtri',val:'exact'};
 
 // ═══════════════════════════════
 // NAVIGATION
@@ -1375,7 +2006,8 @@ function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
-  if(id==='s-home') loadHomeStatus();
+  if(id==='s-home') { loadHomeStatus(); checkSubStatus(); }
+  if(id==='s-profile') { loadProfile(); }
   if(id==='s-rules') renderRules();
   if(id==='s-rsettings') renderRuleSettings();
   if(id==='s-filters') renderFilters();
@@ -1398,8 +2030,9 @@ function toast(msg,type='ok'){
 // ═══════════════════════════════
 async function loadHomeStatus(){
   try{
-    const r=await fetch(`avtopassbot-production.up.railway.app/auth/status/${UID}`);
+    const r=await fetch(`${API}/auth/status/${UID}`);
     const d=await r.json();
+    if(d.community_link) { window.COMMUNITY_LINK = d.community_link; }
     renderHomeConn(d);
   }catch(e){
     renderHomeConn({connected:false});
@@ -1417,7 +2050,7 @@ function renderHomeConn(d){
   }
 }
 async function disconnect(){
-  try{ await fetch(`avtopassbot-production.up.railway.app/auth/disconnect/${UID}`,{method:'POST'}); }catch(e){}
+  try{ await fetch(`${API}/auth/disconnect/${UID}`,{method:'POST'}); }catch(e){}
   toast('Akkaunt uzildi','ok'); loadHomeStatus();
 }
 
@@ -1427,24 +2060,17 @@ async function disconnect(){
 async function startFw(){
   let connected=false;
   try{
-    const r=await fetch(`avtopassbot-production.up.railway.app/auth/status/${UID}`);
+    const r=await fetch(`${API}/auth/status/${UID}`);
     const d=await r.json();
     connected=d.connected;
   }catch(e){}
-  if(!connected){ openModal('m-bundle'); return; }
+  if(!connected){ doExpert(); return; }
   await loadChats();
   go('s-src');
 }
 function doExpert(){
-  closeModal('m-bundle');
   document.getElementById('conn-title').textContent='Expert (Trial)';
   document.getElementById('conn-desc').innerHTML='<i class="fa-solid fa-check" style="color:var(--success)"></i> Cheksiz qoidalar<br><i class="fa-solid fa-check" style="color:var(--success)"></i> Cheksiz xabarlar<br><i class="fa-solid fa-check" style="color:var(--success)"></i> Tezkor yetkazish<br><i class="fa-solid fa-check" style="color:var(--success)"></i> 40+ imkoniyat<br><i class="fa-solid fa-check" style="color:var(--success)"></i> 7 kunlik sinov<br><br><i class="fa-solid fa-lock" style="color:var(--muted)"></i> Shaxsiy chatlar uchun akkaunt ulash kerak.';
-  setConnStep(1); go('s-connect');
-}
-function doExpress(){
-  closeModal('m-bundle');
-  document.getElementById('conn-title').textContent='Express Demo';
-  document.getElementById('conn-desc').textContent='Faqat ochiq manbalarda yangi xabarlar bilan ishlaydi.';
   setConnStep(1); go('s-connect');
 }
 
@@ -1465,7 +2091,7 @@ async function sendCode(){
   const btn=document.getElementById('btn-code');
   btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Yuborilmoqda...';
   try{
-    const r=await fetch(`avtopassbot-production.up.railway.app/auth/send_code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,phone})});
+    const r=await fetch(`${API}/auth/send_code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,phone})});
     const d=await r.json();
     if(d.ok){ pendingPhone=phone; phoneCodeHash=d.phone_code_hash; setConnStep(2); toast('<i class="fa-solid fa-check"></i> Kod yuborildi','ok'); }
     else toast(d.detail||'Xato','err');
@@ -1479,7 +2105,7 @@ async function verifyCode(){
   const code=document.getElementById('inp-code').value.trim();
   if(code.length!==5){toast('<i class="fa-solid fa-circle-exclamation"></i> 5 xonali kod kiriting','err');return;}
   try{
-    const r=await fetch(`avtopassbot-production.up.railway.app/auth/verify_code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,phone:pendingPhone,code,phone_code_hash:phoneCodeHash})});
+    const r=await fetch(`${API}/auth/verify_code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,phone:pendingPhone,code,phone_code_hash:phoneCodeHash})});
     const d=await r.json();
     if(d.ok){ toast('<i class="fa-solid fa-check"></i> Ulandi!','ok'); await loadChats(); go('s-src'); }
     else if(d.need_password){ setConnStep(3); }
@@ -1490,7 +2116,7 @@ async function verifyPass(){
   const pw=document.getElementById('inp-pass').value;
   if(!pw){toast('Parol kiriting','err');return;}
   try{
-    const r=await fetch(`avtopassbot-production.up.railway.app/auth/verify_password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,password:pw})});
+    const r=await fetch(`${API}/auth/verify_password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,password:pw})});
     const d=await r.json();
     if(d.ok){ toast('<i class="fa-solid fa-check"></i> Ulandi!','ok'); await loadChats(); go('s-src'); }
     else toast("Noto'g'ri parol",'err');
@@ -1505,11 +2131,21 @@ function togglePass(){
 // ═══════════════════════════════
 // CHATS
 // ═══════════════════════════════
-async function loadChats(){
+let _chatsCache = null;
+let _chatsCacheTime = 0;
+async function loadChats(force){
+  // Cache for 60 seconds
+  if(!force && _chatsCache && (Date.now() - _chatsCacheTime < 60000)) {
+    allChats = _chatsCache;
+    renderList('src'); renderList('dst');
+    return;
+  }
   try{
-    const r=await fetch(`avtopassbot-production.up.railway.app/chats/${UID}`);
+    const r=await fetch(`${API}/chats/${UID}`);
     const d=await r.json();
     allChats=d.chats;
+    _chatsCache = allChats;
+    _chatsCacheTime = Date.now();
   }catch(e){ loadDemoChats(); }
   renderList('src'); renderList('dst');
 }
@@ -1636,7 +2272,7 @@ async function createRule(){
     created:new Date().toLocaleDateString('uz-UZ')
   };
   try{
-    const r=await fetch(`avtopassbot-production.up.railway.app/rules/add`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,...rule})});
+    const r=await fetch(`${API}/rules/add`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:UID,...rule})});
     const d=await r.json();
     if(d.ok){ rules.push(rule); saveRules(); toast('<i class="fa-solid fa-check"></i> Qoida yaratildi!','ok'); go('s-rsettings'); }
     else showAdminModal();
@@ -1707,9 +2343,21 @@ function renderRules(){
   el.innerHTML=html;
 }
 function openRule(i){ currentRuleIdx=i; ruleSettings=rules[i].settings||{}; activeFilters=[...(rules[i].filters||[])]; go('s-rsettings'); }
-function toggleRule(i){ rules[i].active=!rules[i].active; saveRules(); renderRules(); toast(rules[i].active?'<i class="fa-solid fa-play"></i> Yoqildi':'<i class="fa-solid fa-pause"></i> To\'xtatildi','ok'); }
-function delRule(i){ if(!confirm('Qoidani o\'chirish?'))return; rules.splice(i,1); saveRules(); renderRules(); toast('<i class="fa-solid fa-trash"></i> O\'chirildi','ok'); }
-function deleteCurrentRule(){ if(currentRuleIdx>=0){ rules.splice(currentRuleIdx,1); saveRules(); toast('<i class="fa-solid fa-trash"></i> O\'chirildi','ok'); go('s-rules'); } }
+async function toggleRule(i){ 
+  rules[i].active=!rules[i].active; saveRules(); renderRules(); 
+  toast(rules[i].active?'<i class="fa-solid fa-play"></i> Yoqildi':'<i class="fa-solid fa-pause"></i> To\'xtatildi','ok');
+  try { await fetch(`${API}/rules/toggle`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: UID, rule_index: i}) }); } catch(e){}
+}
+async function delRule(i){ 
+  if(!confirm('Qoidani o\'chirish?'))return; rules.splice(i,1); saveRules(); renderRules(); toast('<i class="fa-solid fa-trash"></i> O\'chirildi','ok');
+  try { await fetch(`${API}/rules/delete`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: UID, rule_index: i}) }); } catch(e){}
+}
+async function deleteCurrentRule(){ 
+  if(currentRuleIdx>=0){ 
+    const idx = currentRuleIdx; rules.splice(idx,1); saveRules(); toast('<i class="fa-solid fa-trash"></i> O\'chirildi','ok'); go('s-rules');
+    try { await fetch(`${API}/rules/delete`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: UID, rule_index: idx}) }); } catch(e){}
+  }
+}
 
 // ═══════════════════════════════
 // RULE SETTINGS
@@ -1732,6 +2380,25 @@ function renderRuleSettings(){
     const el=document.getElementById('tgl-'+k);
     if(el){ const v=ruleSettings[k]; el.className='toggle'+(v?' on':''); }
   });
+  
+  const defaults = {
+    mode: 'new', receipt_delays: '0', sync_edits: 'edit', delayed_del: '0',
+    duplicates: 'pass', my_messages: 'filter', filter_interval: '0', filter_order: 'after_replacements',
+    filter_fwd: 'all', delay_filter: '0', orig_link: 'none', source_name: 'none',
+    author: 'none', click_btn: 'none', replacements: '0', trim: '0',
+    header: 'none', footer: 'none', replace_links: 'ignore', watermarks: 'none',
+    media_caption: 'caption_name', feedback_btns: 'none', copy_btns: 'none',
+    add_btns: 'none', polls: 'none', comments: '0', pub_delay: '0',
+    preview: 'pass', delivery_rate: '0', schedule: '0', flood_behavior: 'reschedule...',
+    moderation: 'Off'
+  };
+  Object.entries(defaults).forEach(([k, d]) => {
+    const el = document.getElementById('sv-' + k);
+    if (el) {
+      el.textContent = ruleSettings[k] !== undefined ? ruleSettings[k] : d;
+    }
+  });
+
   const fi=document.getElementById('sv-filters');
   if(fi) fi.textContent=activeFilters.length;
 }
@@ -1741,11 +2408,14 @@ function toggleSec(id){
   body.classList.toggle('open');
   arr.classList.toggle('open');
 }
-function toggleBool(key){
+async function toggleBool(key){
   ruleSettings[key]=!ruleSettings[key];
   const el=document.getElementById('tgl-'+key);
   if(el) el.className='toggle'+(ruleSettings[key]?' on':'');
-  if(currentRuleIdx>=0){ rules[currentRuleIdx].settings=ruleSettings; saveRules(); }
+  if(currentRuleIdx>=0){ 
+    rules[currentRuleIdx].settings=ruleSettings; saveRules();
+    try { await fetch(`${API}/rules/update_setting`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: UID, rule_index: currentRuleIdx, key: key, value: ruleSettings[key]}) }); } catch(e){}
+  }
 }
 let editKey='';
 function editSetting(key,label){
@@ -1754,12 +2424,15 @@ function editSetting(key,label){
   document.getElementById('edit-inp').value=ruleSettings[key]||document.getElementById('sv-'+key)?.textContent||'';
   openModal('m-edit');
 }
-function saveEdit(){
+async function saveEdit(){
   const val=document.getElementById('edit-inp').value;
   ruleSettings[editKey]=val;
   const sv=document.getElementById('sv-'+editKey);
   if(sv) sv.textContent=val;
-  if(currentRuleIdx>=0){ rules[currentRuleIdx].settings=ruleSettings; saveRules(); }
+  if(currentRuleIdx>=0){ 
+    rules[currentRuleIdx].settings=ruleSettings; saveRules();
+    try { await fetch(`${API}/rules/update_setting`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: UID, rule_index: currentRuleIdx, key: editKey, value: val}) }); } catch(e){}
+  }
   closeModal('m-edit'); toast('<i class="fa-solid fa-check"></i> Saqlandi','ok');
 }
 function filterSettings(){
@@ -1773,18 +2446,18 @@ function filterSettings(){
 // FILTERS
 // ═══════════════════════════════
 const filterTypes=[
-  {icon:'🎯',label:'Exact text filter',val:'exact'},
-  {icon:'🔍',label:'RegEx filter',val:'regex'},
-  {icon:'🕐',label:'Date/time filter',val:'datetime'},
-  {icon:'💬',label:'Topic filter',val:'topic'},
-  {icon:'👤',label:'Author filter',val:'author'},
-  {icon:'👁',label:'Min. views',val:'min_views'},
-  {icon:'❤️',label:'Min. reactions',val:'min_reactions'},
-  {icon:'➡️',label:'Min. forwards',val:'min_forwards'},
-  {icon:'💬',label:'Min. replies',val:'min_replies'},
-  {icon:'❤️',label:'Min. reactions to views',val:'react_views'},
-  {icon:'➡️',label:'Min. forwards to views',val:'fwd_views'},
-  {icon:'💬',label:'Min. replies to views',val:'rep_views'},
+  {icon:'🎯',label:'Aniq matn filtri',val:'exact'},
+  {icon:'🔍',label:'RegEx (qolip) filtri',val:'regex'},
+  {icon:'🕐',label:'Sana/vaqt filtri',val:'datetime'},
+  {icon:'💬',label:'Mavzu filtri',val:'topic'},
+  {icon:'👤',label:'Muallif filtri',val:'author'},
+  {icon:'👁',label:'Min. ko\'rishlar',val:'min_views'},
+  {icon:'❤️',label:'Min. reaksiyalar',val:'min_reactions'},
+  {icon:'➡️',label:'Min. ulashishlar',val:'min_forwards'},
+  {icon:'💬',label:'Min. izohlar',val:'min_replies'},
+  {icon:'❤️',label:'Min. reaksiya/ko\'rish',val:'react_views'},
+  {icon:'➡️',label:'Min. ulashish/ko\'rish',val:'fwd_views'},
+  {icon:'💬',label:'Min. izoh/ko\'rish',val:'rep_views'},
 ];
 function buildFTypeDropdown(){
   const el=document.getElementById('ftype-drop');
@@ -1808,7 +2481,7 @@ function selFType(ft){
 }
 function addFilter(){
   activeFilters.push({type:selectedFilterType.val,icon:selectedFilterType.icon,label:selectedFilterType.label,value:'',enabled:true});
-  if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); }
+  if(currentRuleIdx>=0){ syncFilters(); }
   renderFilters();
   const fi=document.getElementById('sv-filters');
   if(fi) fi.textContent=activeFilters.length;
@@ -1832,17 +2505,17 @@ function renderFilters(){
 }
 function toggleFilter(i){
   activeFilters[i].enabled=!activeFilters[i].enabled;
-  if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); }
+  if(currentRuleIdx>=0){ syncFilters(); }
   renderFilters();
 }
 function updateFilterVal(i,v){ activeFilters[i].value=v; }
 function saveFilterVal(i){
-  if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); }
+  if(currentRuleIdx>=0){ syncFilters(); }
   toast('<i class="fa-solid fa-check"></i> Saqlandi','ok');
 }
 function removeFilter(i){
   activeFilters.splice(i,1);
-  if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); }
+  if(currentRuleIdx>=0){ syncFilters(); }
   renderFilters();
   const fi=document.getElementById('sv-filters');
   if(fi) fi.textContent=activeFilters.length;
@@ -1850,7 +2523,12 @@ function removeFilter(i){
 function enableAllFilters(){ activeFilters.forEach(f=>f.enabled=true); syncFilters(); renderFilters(); toast('Barchasi yoqildi','ok'); }
 function disableAllFilters(){ activeFilters.forEach(f=>f.enabled=false); syncFilters(); renderFilters(); toast("Barchasi o'chirildi",'ok'); }
 function deleteAllFilters(){ if(!confirm("Barcha filterni o'chirish?"))return; activeFilters=[]; syncFilters(); renderFilters(); toast("O'chirildi",'ok'); }
-function syncFilters(){ if(currentRuleIdx>=0){ rules[currentRuleIdx].filters=activeFilters; saveRules(); } }
+async function syncFilters(){ 
+  if(currentRuleIdx>=0){ 
+    rules[currentRuleIdx].filters=activeFilters; saveRules();
+    try { await fetch(`${API}/rules/update_filters`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: UID, rule_index: currentRuleIdx, filters: activeFilters}) }); } catch(e){}
+  } 
+}
 function toggleFilterInfo(){
   const el=document.getElementById('filter-info');
   el.style.display=el.style.display==='none'?'block':'none';
@@ -1876,6 +2554,27 @@ function load_local_status(){ return null; }
 // ═══════════════════════════════
 loadDemoChats();
 loadHomeStatus();
+checkSubStatus();
 </script>
+<div id="mod-add-sub" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px)">
+  <div style="background:var(--surface); border-radius:var(--r-lg); width:100%; max-width:320px; padding:24px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 40px rgba(0,0,0,0.5)">
+     <h3 style="margin:0 0 16px; font-size:18px; color:var(--text); font-weight:800">Obuna qo'shish</h3>
+     <p style="font-size:13px; color:var(--muted); margin-bottom:20px" id="add-sub-username"></p>
+     <input type="hidden" id="add-sub-uid">
+     
+     <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:24px" id="add-sub-radios">
+        <label style="display:flex; align-items:center; gap:12px; font-size:15px; color:var(--text); cursor:pointer"><input type="radio" name="add_sub_months" value="1" checked style="width:18px; height:18px; accent-color:var(--accent)"> 1 Oy</label>
+        <label style="display:flex; align-items:center; gap:12px; font-size:15px; color:var(--text); cursor:pointer"><input type="radio" name="add_sub_months" value="3" style="width:18px; height:18px; accent-color:var(--accent)"> 3 Oy</label>
+        <label style="display:flex; align-items:center; gap:12px; font-size:15px; color:var(--text); cursor:pointer"><input type="radio" name="add_sub_months" value="6" style="width:18px; height:18px; accent-color:var(--accent)"> 6 Oy</label>
+        <label style="display:flex; align-items:center; gap:12px; font-size:15px; color:var(--text); cursor:pointer"><input type="radio" name="add_sub_months" value="12" style="width:18px; height:18px; accent-color:var(--accent)"> 12 Oy</label>
+        <label style="display:flex; align-items:center; gap:12px; font-size:15px; color:var(--text); cursor:pointer"><input type="radio" name="add_sub_months" value="999" style="width:18px; height:18px; accent-color:var(--accent)"> Cheksiz (obuna talab qilinmaydi)</label>
+     </div>
+     
+     <div style="display:flex; gap:12px">
+        <button class="btn" style="flex:1; background:var(--surface3); color:var(--text2)" onclick="document.getElementById('mod-add-sub').style.display='none'">Bekor qilish</button>
+        <button class="btn btn-p" style="flex:1" onclick="submitAddSub()">Saqlash</button>
+     </div>
+  </div>
+</div>
 </body>
 </html>
